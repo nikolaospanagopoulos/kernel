@@ -2,6 +2,7 @@
 #include "idt.h"
 #include "io.h"
 
+extern void problem();
 uint16_t *videomem = 0;
 uint16_t terminalRow = 0;
 uint16_t terminalCol = 0;
@@ -25,8 +26,7 @@ void kernel_main() {
 
   // initialize interupt descriptor table
   initializeIdt();
-
-  outb(0x60, 0xff);
+  enable_interrupts();
 }
 
 void terminalPutChar(int x, int y, char c, char colour) {

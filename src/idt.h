@@ -19,3 +19,5 @@ struct idtrDesc {
 
 void idtSet(int interuptNumber, void *address);
 void initializeIdt();
+void enable_interrupts();
+void disable_interrupts();
