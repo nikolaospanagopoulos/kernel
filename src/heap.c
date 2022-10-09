@@ -139,3 +139,21 @@ void heapBlocksMarkAsTaken(struct heap *heap, int start_block,
     }
   }
 }
+void heapFree(struct heap *heap, void *ptr) {
+
+  heapMarkBlocksFree(heap, heapAddressToBlock(heap, ptr));
+}
+int heapAddressToBlock(struct heap *heap, void *address) {
+  return ((int)(address - heap->startAddress)) / heapBlockSize;
+}
+
+void heapMarkBlocksFree(struct heap *heap, size_t startBlock) {
+  struct heap_table *heapTable = heap->table;
+  for (size_t i = startBlock; i < heapTable->total; i++) {
+    HEAP_BLOCK_TABLE_ENTRY entry = heapTable->entries[i];
+    heapTable->entries[i] = HEAP_BLOCK_TABLE_ENTRY_FREE;
+    if (!(entry & HEAP_BLOCK_HAS_NEXT)) {
+      break;
+    }
+  }
+}

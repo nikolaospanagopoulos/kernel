@@ -30,11 +30,6 @@ void kernel_main() {
   kernelHeapInit();
 
   enable_interrupts();
-
-  void *ptr = kmalloc(50);
-  void *ptr2 = kmalloc(5000);
-  if (ptr || ptr2) {
-  }
 }
 
 void terminalPutChar(int x, int y, char c, char colour) {

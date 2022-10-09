@@ -34,3 +34,6 @@ int startBlock(struct heap *heap, uint32_t blocksToAllocate);
 void *heapBlockAddress(struct heap *heap, int start_block);
 void heapBlocksMarkAsTaken(struct heap *heap, int start_block,
                            int total_blocks);
+
+void heapMarkBlocksFree(struct heap *heap, size_t startBlock);
+int heapAddressToBlock(struct heap *heap, void *address);
