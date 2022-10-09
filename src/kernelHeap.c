@@ -19,3 +19,5 @@ void kernelHeapInit() {
     print("error in heap creation");
   }
 }
+
+void *kmalloc(size_t size) { return heapMalloc(&kernelHeap, size); }

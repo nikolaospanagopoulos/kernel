@@ -1,6 +1,7 @@
 #include "kernel.h"
 #include "idt.h"
 #include "io.h"
+#include "kernelHeap.h"
 
 extern void problem();
 uint16_t *videomem = 0;
@@ -26,7 +27,14 @@ void kernel_main() {
 
   // initialize interupt descriptor table
   initializeIdt();
+  kernelHeapInit();
+
   enable_interrupts();
+
+  void *ptr = kmalloc(50);
+  void *ptr2 = kmalloc(5000);
+  if (ptr || ptr2) {
+  }
 }
 
 void terminalPutChar(int x, int y, char c, char colour) {

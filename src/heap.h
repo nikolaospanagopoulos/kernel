@@ -7,7 +7,7 @@
 #define HEAP_BLOCK_TABLE_ENTRY_FREE 0x00
 
 #define HEAP_BLOCK_HAS_NEXT 0b10000000
-#define HEAP_BLOCK_IS_FREE 0b01000000
+#define HEAP_BLOCK_IS_FIRST 0b01000000
 
 typedef unsigned char HEAP_BLOCK_TABLE_ENTRY;
 
@@ -26,3 +26,11 @@ struct heap {
 
 int heapCreate(struct heap *heap, void *ptr, void *end,
                struct heap_table *table);
+
+void *heapMalloc(struct heap *heap, size_t size);
+void heapFree(struct heap *heap, void *ptr);
+void *heapMallocBlocks(struct heap *heap, uint32_t totalBlocksToAllocate);
+int startBlock(struct heap *heap, uint32_t blocksToAllocate);
+void *heapBlockAddress(struct heap *heap, int start_block);
+void heapBlocksMarkAsTaken(struct heap *heap, int start_block,
+                           int total_blocks);
