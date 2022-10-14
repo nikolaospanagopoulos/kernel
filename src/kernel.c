@@ -2,6 +2,7 @@
 #include "idt.h"
 #include "io.h"
 #include "kernelHeap.h"
+#include "paging.h"
 
 extern void problem();
 uint16_t *videomem = 0;
@@ -18,17 +19,23 @@ void print(const char *string) {
     terminalWriteChar(string[i], 15);
   }
 }
-
+struct paging4gbChunk *kernel_chunck = 0;
 void kernel_main() {
 
   terminalInitialize();
 
   print("hello world!\n");
 
+  kernelHeapInit();
   // initialize interupt descriptor table
   initializeIdt();
-  kernelHeapInit();
 
+  // enable paging
+
+  kernel_chunck = pagingNew4gb(PAGING_IS_WRITABLE | PAGING_IS_PRESENT |
+                               PAGING_ACCESS_FROM_ALL);
+  pagingSwitch(get4GbchunckDirectory(kernel_chunck));
+  enable_paging();
   enable_interrupts();
 }
 
