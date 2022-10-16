@@ -1,4 +1,5 @@
 #include "kernel.h"
+#include "disk.h"
 #include "idt.h"
 #include "io.h"
 #include "kernelHeap.h"
@@ -36,19 +37,13 @@ void kernel_main() {
   // switch to kernel paging directory
   pagingSwitch(get4GbchunckDirectory(kernel_chunck));
 
-  char *ptr = kzalloc(4096);
-
-  pagingSet(get4GbchunckDirectory(kernel_chunck), (void *)0x1000,
-            (uint32_t)ptr | PAGING_ACCESS_FROM_ALL | PAGING_IS_PRESENT |
-                PAGING_IS_WRITABLE);
   // enable paging
   enable_paging();
 
-  char *ptr2 = (char *)0x1000;
-  ptr2[0] = 'A';
-  ptr2[1] = 'B';
-  print(ptr2);
-  print(ptr);
+  char buff[512];
+
+  diskReadSector(0, 1, buff);
+  // enable interrupts
   enable_interrupts();
 }
 
