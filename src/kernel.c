@@ -28,6 +28,10 @@ void kernel_main() {
   print("hello world!\n");
 
   kernelHeapInit();
+  // disk search and init
+
+  diskSearchAndInit();
+
   // initialize interupt descriptor table
   initializeIdt();
 
@@ -40,9 +44,6 @@ void kernel_main() {
   // enable paging
   enable_paging();
 
-  char buff[512];
-
-  diskReadSector(0, 1, buff);
   // enable interrupts
   enable_interrupts();
 }
