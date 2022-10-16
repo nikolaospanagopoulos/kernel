@@ -30,12 +30,25 @@ void kernel_main() {
   // initialize interupt descriptor table
   initializeIdt();
 
-  // enable paging
-
+  // create paging directory
   kernel_chunck = pagingNew4gb(PAGING_IS_WRITABLE | PAGING_IS_PRESENT |
                                PAGING_ACCESS_FROM_ALL);
+  // switch to kernel paging directory
   pagingSwitch(get4GbchunckDirectory(kernel_chunck));
+
+  char *ptr = kzalloc(4096);
+
+  pagingSet(get4GbchunckDirectory(kernel_chunck), (void *)0x1000,
+            (uint32_t)ptr | PAGING_ACCESS_FROM_ALL | PAGING_IS_PRESENT |
+                PAGING_IS_WRITABLE);
+  // enable paging
   enable_paging();
+
+  char *ptr2 = (char *)0x1000;
+  ptr2[0] = 'A';
+  ptr2[1] = 'B';
+  print(ptr2);
+  print(ptr);
   enable_interrupts();
 }
 

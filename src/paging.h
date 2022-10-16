@@ -6,7 +6,7 @@
 #define PAGING_IS_PRESENT 0b00000001
 #define PAGING_TOTAL_ENTRIES_PER_TABLE 1024
 #define PAGING_PAGE_SIZE 4096
-
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
 
@@ -18,3 +18,7 @@ struct paging4gbChunk *pagingNew4gb(uint8_t flags);
 void pagingSwitch(uint32_t *directory);
 uint32_t *get4GbchunckDirectory(struct paging4gbChunk *chunk);
 void enable_paging();
+int pagingGetIndexes(void *virtualAddress, uint32_t *directoryIndexOut,
+                     uint32_t *tableIndexOut);
+bool pagingIsAlligned(void *address);
+int pagingSet(uint32_t *directory, void *virt, uint32_t val);

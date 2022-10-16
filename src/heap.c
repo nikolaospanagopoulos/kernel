@@ -19,7 +19,7 @@ out:
 }
 
 static int validateHeapAllignment(void *ptr) {
-  return ((unsigned long)ptr % heapBlockSize) == 0;
+  return ((unsigned int)ptr % heapBlockSize) == 0;
 }
 
 int heapCreate(struct heap *heap, void *ptr, void *end,
