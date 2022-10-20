@@ -4,6 +4,8 @@
 #include "io.h"
 #include "kernelHeap.h"
 #include "paging.h"
+#include "pparser.h"
+#include "streamer.h"
 
 extern void problem();
 uint16_t *videomem = 0;
@@ -46,6 +48,15 @@ void kernel_main() {
 
   // enable interrupts
   enable_interrupts();
+
+  struct diskStream *stream = diskstreamerNew(0);
+
+  diskStreamerSeek(stream, 0x201);
+  unsigned char c = 0;
+
+  diskstreamerRead(stream, &c, 1);
+  while (1) {
+  }
 }
 
 void terminalPutChar(int x, int y, char c, char colour) {
@@ -67,17 +78,6 @@ void terminalWriteChar(char c, char colour) {
     terminalCol = 0;
     terminalRow += 1;
   }
-}
-
-size_t strlen(const char *str) {
-
-  size_t len = 0;
-  while (str[len]) {
-
-    len++;
-  }
-
-  return len;
 }
 
 void terminalInitialize() {
