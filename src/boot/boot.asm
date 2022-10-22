@@ -5,11 +5,31 @@ BITS 16
 CODE_SEG equ gdt_code - gdt_start
 DATA_SEG equ gdt_data_segment - gdt_start
 
-_start:
-   jmp short start
-   nop
+jmp short start
+nop
+;FAT 16 Header BIOS PARAMETER BLOCK
+OEMIdentifier    db 'PANOS   '
+BytesPerSector   dw 0x200 ;512 bytes
+SectorPerCluster db 0x80  ;Logical sectors per cluster -> 128
+ReservedSectors  dw 200   ;The number of logical sectors before the first FAT. At least one (holds boot sector)
+FatCopies        db 0x02  ;2 FAT systems . 1 main and 1 backup
+RootDirEntries   dw 0x40  ;Maximum number of FAT12 root directory entries. 
+NumSectors       dw 0x00  ;Total logical sectors (If zero, use 4 byte value at offset 0x020)
+MediaType        db 0xF8  ;Media descriptor
+SectorsPerFat    dw 0x100 ;Logical sectors per File Allocation Table
+SectorsPerTrack  dw 0x20  ;Physical sectors per track for disks with INT 13h CHS geometry
+NumberOfHeads    dw 0x40  ;Number of heads for disks with INT 13h CHS geometry
+HiddenSectors    dd 0x00  ;Count of hidden sectors preceding the partition that contains this FAT volume. This field should always be zero on media that are not partitioned.
+SectorsBig       dd 0x773594
 
-times 33 db 0
+; Extended Bios parameter block
+
+DriveNumber      db 0x80 ;0x80 for (first) fixed disk as per INT 13h
+WindowsNtBit     db 0x00 ;Should be set to 0 by formatting tools.
+Signature        db 0x29 ;indicates that an EBPB with the following 3 entries exists
+VolumeID         dd 0xD105 ;Serial Number
+PartitionIDString db "NO NAME    ";Partition Volume Label
+SystemIDString    db "FAT16   ";File system type, padded with blanks
 
 start:
     jmp 0:step2
