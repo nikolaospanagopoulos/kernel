@@ -28,7 +28,7 @@ void idtSet(int interuptNumber, void *address) {
   desc->offset_2 = (uint32_t)address >> 16;
 }
 void initializeIdt() {
-  memset(intDescriptors, 0, sizeof(intDescriptors) / sizeof(intDescriptors[0]));
+  memset(intDescriptors, 0, sizeof(intDescriptors));
 
   idtrDescriptor.limit = sizeof(intDescriptors) - 1;
   idtrDescriptor.base = (uint32_t)intDescriptors;

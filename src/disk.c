@@ -38,6 +38,7 @@ void diskSearchAndInit() {
   memset(&disk, 0, sizeof(disk));
   disk.type = DISK_TYPE_REAL;
   disk.sectorSize = SECTOR_SIZE;
+  disk.fileSystem = fsResolve(&disk);
 }
 
 struct disk *getDisk(int index) {

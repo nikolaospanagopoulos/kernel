@@ -8,3 +8,6 @@
 #define heapAddress 0x01000000
 #define heapTableAddress 0x00007E00
 #define SECTOR_SIZE 512
+
+#define MAX_FILESYSTEMS 12
+#define MAX_FILE_DESCRIPTORS 512

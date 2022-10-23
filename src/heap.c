@@ -111,7 +111,7 @@ int startBlock(struct heap *heap, uint32_t blocksToAllocate) {
     }
   }
   if (bs == -1) {
-    return -ENOMEN;
+    return -ENOMEM;
   }
   return bs;
 }

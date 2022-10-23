@@ -1,4 +1,5 @@
 #pragma once
+#include "file.h"
 // real physical hard disk
 
 typedef unsigned int DISK_TYPE;
@@ -8,6 +9,7 @@ typedef unsigned int DISK_TYPE;
 struct disk {
   DISK_TYPE type;
   int sectorSize;
+  struct fileSystem *fileSystem;
 };
 
 void diskSearchAndInit();
