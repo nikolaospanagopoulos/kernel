@@ -24,3 +24,17 @@ size_t strnlen(const char *ptr, size_t max) {
 bool isDigit(char c) { return c >= 48 && c <= 57; }
 
 int toNumericDigit(char c) { return c - 48; }
+
+char *strcpy(char *dest, const char *src) {
+  char *tmp = dest;
+
+  while (*src != 0) {
+    *dest = *src;
+    src += 1;
+    dest += 1;
+  };
+
+  *dest = 0x00;
+
+  return tmp;
+}

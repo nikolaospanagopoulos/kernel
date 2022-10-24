@@ -1,5 +1,6 @@
 #include "file.h"
 #include "config.h"
+#include "fat16.h"
 #include "kernel.h"
 #include "kernelHeap.h"
 #include "memory.h"
@@ -32,10 +33,7 @@ void fsInsertFilesystem(struct fileSystem *fileSystem) {
 }
 
 // load filesystems built into the kernel
-static void fsStaticLoad() {
-
-  // fsInsertFilesystem(fat16Init());
-}
+static void fsStaticLoad() { fsInsertFilesystem(fat16Init()); }
 
 void fsLoad() {
 
@@ -76,7 +74,7 @@ struct fileSystem *fsResolve(struct disk *disk) {
   struct fileSystem *fs = 0;
 
   for (int i = 0; i < MAX_FILESYSTEMS; i++) {
-    if (fileSystems[i] != 0 && fileSystems[i]->resolve == 0) {
+    if (fileSystems[i] != 0 && fileSystems[i]->resolve(disk) == 0) {
       fs = fileSystems[i];
       break;
     }

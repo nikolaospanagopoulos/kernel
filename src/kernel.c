@@ -1,5 +1,6 @@
 #include "kernel.h"
 #include "disk.h"
+#include "file.h"
 #include "idt.h"
 #include "io.h"
 #include "kernelHeap.h"
@@ -30,6 +31,10 @@ void kernel_main() {
   print("hello world!\n");
 
   kernelHeapInit();
+
+  // initialize file system
+  fsInit();
+
   // disk search and init
 
   diskSearchAndInit();
@@ -49,12 +54,6 @@ void kernel_main() {
   // enable interrupts
   enable_interrupts();
 
-  struct diskStream *stream = diskstreamerNew(0);
-
-  diskStreamerSeek(stream, 0x201);
-  unsigned char c = 0;
-
-  diskstreamerRead(stream, &c, 1);
   while (1) {
   }
 }

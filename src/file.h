@@ -37,7 +37,7 @@ struct fileDescriptor {
   struct disk *disk;
 };
 
-void fs_init();
+void fsInit();
 int fopen(const char *filename, const char *mode);
 void fsInsertFilesystem(struct fileSystem *fileSystem);
 struct fileSystem *fsResolve(struct disk *disk);
