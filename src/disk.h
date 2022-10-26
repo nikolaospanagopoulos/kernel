@@ -10,6 +10,10 @@ struct disk {
   DISK_TYPE type;
   int sectorSize;
   struct fileSystem *fileSystem;
+  int id;
+
+  // private data of fileSystem
+  void *fsPrivate;
 };
 
 void diskSearchAndInit();
