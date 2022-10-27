@@ -1,10 +1,13 @@
 #include "file.h"
 #include "config.h"
+#include "disk.h"
 #include "fat16.h"
 #include "kernel.h"
 #include "kernelHeap.h"
 #include "memory.h"
+#include "pparser.h"
 #include "status.h"
+#include "string.h"
 
 struct fileSystem *fileSystems[MAX_FILESYSTEMS];
 struct fileDescriptor *fileDescriptors[MAX_FILE_DESCRIPTORS];
@@ -82,4 +85,70 @@ struct fileSystem *fsResolve(struct disk *disk) {
   return fs;
 }
 
-int fopen(const char *filename, const char *mode) { return -EIO; }
+FILE_MODE fetFileModeByString(const char *str) {
+  FILE_MODE mode = FILE_MODE_INVALID;
+  if (strncmp(str, "r", 1) == 0) {
+    mode = FILE_MODE_READ;
+  }
+  if (strncmp(str, "w", 1) == 0) {
+    mode = FILE_MODE_WRITE;
+  }
+  if (strncmp(str, "a", 1) == 0) {
+    mode = FILE_MODE_APPEND;
+  }
+
+  return mode;
+}
+
+int fopen(const char *filename, const char *modeStr) {
+  int res = 0;
+
+  struct pathRoot *rootPath = parse(filename, NULL);
+  if (!rootPath) {
+    res = -EINVARG;
+    goto out;
+  }
+  // we can not have just root path. we need filename
+  if (!rootPath->first) {
+    res = -EINVARG;
+    goto out;
+  }
+  // in case we cannot read from specific drive
+  struct disk *disk = getDisk(rootPath->driveNumber);
+  if (!disk) {
+    res = -EIO;
+    goto out;
+  }
+
+  if (!disk->fileSystem) {
+    res = -EIO;
+    goto out;
+  }
+  FILE_MODE mode = fetFileModeByString(modeStr);
+  if (mode == FILE_MODE_INVALID) {
+    res = -EINVARG;
+    goto out;
+  }
+  void *descriptorPrivateData =
+      disk->fileSystem->open(disk, rootPath->first, mode);
+  if (ISERR(descriptorPrivateData)) {
+    res = ERROR_I(descriptorPrivateData);
+    goto out;
+  }
+
+  struct fileDescriptor *desc = 0;
+  res = fileNewDescriptor(&desc);
+
+  if (res < 0) {
+    goto out;
+  }
+  desc->fileSystem = disk->fileSystem;
+  desc->privateData = descriptorPrivateData;
+  desc->disk = disk;
+  res = desc->index;
+out:
+  if (res < 0) {
+    res = 0;
+  }
+  return res;
+}

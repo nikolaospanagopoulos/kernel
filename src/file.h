@@ -38,6 +38,6 @@ struct fileDescriptor {
 };
 
 void fsInit();
-int fopen(const char *filename, const char *mode);
+int fopen(const char *filename, const char *modeStr);
 void fsInsertFilesystem(struct fileSystem *fileSystem);
 struct fileSystem *fsResolve(struct disk *disk);

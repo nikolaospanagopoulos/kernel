@@ -12,3 +12,7 @@ size_t strlen(const char *str);
 uint16_t terminalMakeChar(char c, char colour);
 void terminalWriteChar(char c, char colour);
 void kernel_main();
+
+#define ERROR(value) (void *)(value)
+#define ERROR_I(value) (int)(value)
+#define ISERR(value) ((int)value < 0)
