@@ -1,8 +1,10 @@
 #include "fat16.h"
 #include "config.h"
 #include "disk.h"
+#include "file.h"
 #include "kernel.h"
 #include "kernelHeap.h"
+#include "pparser.h"
 #include "status.h"
 #include "streamer.h"
 #include "string.h"
@@ -102,7 +104,7 @@ struct fatItem { // either directory or file
   FAT_ITEM_TYPE type;
 };
 
-struct fatItemDescriptor { // open file
+struct fatFileDescriptor { // open file
   struct fatItem *item;
   uint32_t position;
 };
@@ -261,7 +263,71 @@ out:
   }
   return res;
 }
+// null terminated instead of space
+void fat16ToProper(char **out, const char *in) {
+  while (*in != 0x00 && *in != 0x20) {
+    **out = *in;
+    *out += 1;
+    in += 1;
+  }
+  if (*in == 0x20) {
+    **out = 0x00;
+  }
+}
 
+void fat16GetFullRelativeFilename(struct fatDirectoryItem *item, char *out,
+                                  int maxLen) {
+  memset(out, 0x00, maxLen);
+  char *outTmp = out;
+  fat16ToProper(&outTmp, (const char *)item->filename);
+  if (item->ext[0] != 0x00 && item->ext[0] != 0x20) {
+    *outTmp++ = '.';
+    fat16ToProper(&outTmp, (const char *)item->ext);
+  }
+}
+
+struct fatItem *fat16FindItemInDirectory(struct disk *disk,
+                                         struct fatDirectory *directory,
+                                         const char *name) {
+  struct fatItem *fatItem = 0;
+  char tmpFilename[MAX_PATH];
+  for (int i = 0; i < directory->total; i++) {
+    fat16GetFullRelativeFilename(&directory->item[i], tmpFilename,
+                                 sizeof(tmpFilename));
+    if (istrncmp(tmpFilename, name, sizeof(tmpFilename)) == 0) {
+      // all is good
+    }
+  }
+}
+struct fatItem *fat16GetDirectoryEntry(struct disk *disk,
+                                       struct pathPart *path) {
+  struct fatPrivateInfo *fatPrivate = disk->fsPrivate;
+  struct fatItem *currentItem = 0;
+
+  struct fatItem *rootItem =
+      fat16FindItemInDirectory(disk, &fatPrivate->rootDirectory, path->part);
+  if (!rootItem) {
+    goto out;
+  }
+
+out:
+  return currentItem;
+}
 void *fat16open(struct disk *disk, struct pathPart *path, FILE_MODE mode) {
-  return 0;
+  if (mode != FILE_MODE_READ) {
+    return ERROR(-ERDONLY);
+  }
+  struct fatFileDescriptor *descriptor = 0;
+  descriptor = kzalloc(sizeof(struct fatFileDescriptor));
+  if (!descriptor) {
+    return ERROR(-ENOMEM);
+  }
+  descriptor->item = fat16GetDirectoryEntry(disk, path);
+
+  if (!descriptor->item) {
+    return ERROR(-EIO);
+  }
+
+  descriptor->position = 0;
+  return descriptor;
 }
