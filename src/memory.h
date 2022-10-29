@@ -3,3 +3,4 @@
 
 void *memset(void *ptr, int c, size_t size);
 int memcmp(void *ptr1, void *ptr2, int count);
+void *memcpy(void *dest, void *src, int len);

@@ -32,3 +32,11 @@ int memcmp(void *ptr1, void *ptr2, int count) {
   }
   return status;
 }
+void *memcpy(void *dest, void *src, int len) {
+  char *d = dest;
+  char *s = src;
+  while (len--) {
+    *d++ = *s++;
+  }
+  return dest;
+}
