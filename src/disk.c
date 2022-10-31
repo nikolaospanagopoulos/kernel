@@ -15,7 +15,7 @@ int diskReadSector(int lba, int total, void *buf) {
   outb(0x1F5, (unsigned char)(lba >> 16));
   outb(0x1F7, 0x20);
 
-  // we are going to read to bytes at the time. so cast to short
+  // we are going two read to bytes at the time. so cast to short
   unsigned short *ptr = (unsigned short *)buf;
 
   for (size_t b = 0; b < total; b++) {

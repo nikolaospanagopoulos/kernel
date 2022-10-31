@@ -152,3 +152,21 @@ out:
   }
   return res;
 }
+int fread(void *ptr, uint32_t size, uint32_t numMemBlocks, int fd) {
+  int res = 0;
+
+  if (size == 0 || numMemBlocks == 0 || fd < 1) {
+    res = -EINVARG;
+    goto out;
+  }
+  struct fileDescriptor *desc = fileGetDescriptor(fd);
+  if (!desc) {
+    res = -EINVARG;
+    goto out;
+  }
+
+  res = desc->fileSystem->read(desc->disk, desc->privateData, size,
+                               numMemBlocks, ptr);
+out:
+  return res;
+}

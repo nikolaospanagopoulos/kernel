@@ -13,7 +13,7 @@ BytesPerSector   dw 0x200 ;512 bytes
 SectorPerCluster db 0x80  ;Logical sectors per cluster -> 128
 ReservedSectors  dw 200   ;The number of logical sectors before the first FAT. At least one (holds boot sector)
 FatCopies        db 0x02  ;2 FAT systems . 1 main and 1 backup
-RootDirEntries   dw 0x40  ;Maximum number of FAT12 root directory entries. 
+RootDirEntries   dw 0x40  ;Maximum number of FAT16 root directory entries. 
 NumSectors       dw 0x00  ;Total logical sectors (If zero, use 4 byte value at offset 0x020)
 MediaType        db 0xF8  ;Media descriptor
 SectorsPerFat    dw 0x100 ;Logical sectors per File Allocation Table
