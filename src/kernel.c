@@ -28,8 +28,6 @@ void kernel_main() {
 
   terminalInitialize();
 
-  print("hello world!\n");
-
   kernelHeapInit();
 
   // initialize file system
@@ -56,7 +54,11 @@ void kernel_main() {
 
   int fd = fopen("0:/hello.txt", "r");
   if (fd) {
-    print("we opened hello");
+    print("\nwe opened hello\n");
+    char buff[13];
+
+    fread(buff, 13, 1, fd);
+    print(buff);
   }
   while (1) {
   }

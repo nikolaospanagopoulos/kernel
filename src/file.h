@@ -25,6 +25,8 @@ typedef int (*FS_RESOLVE_FUNCTION)(struct disk *disk);
 typedef int (*FS_READ_FUNCTION)(struct disk *disk, void *privateData,
                                 uint32_t size, uint32_t numMemBlocks,
                                 char *out);
+typedef int (*FS_SEEK_FUNCTION)(void *privateData, uint32_t offset,
+                                FILE_SEEK_MODE mode);
 
 struct fileSystem {
   // resolve function should return 0 if the disk is using a fileSystem the
@@ -32,6 +34,7 @@ struct fileSystem {
   FS_RESOLVE_FUNCTION resolve;
   FS_OPEN_FUNCTION open;
   FS_READ_FUNCTION read;
+  FS_SEEK_FUNCTION seek;
   // file system name ex FAT16, FAT32 , NTFS etc
   char name[20];
 };
@@ -48,3 +51,4 @@ int fopen(const char *filename, const char *modeStr);
 void fsInsertFilesystem(struct fileSystem *fileSystem);
 struct fileSystem *fsResolve(struct disk *disk);
 int fread(void *ptr, uint32_t size, uint32_t numMemBlocks, int fd);
+int fseek(int fd, int offset, FILE_SEEK_MODE mode);

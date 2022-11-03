@@ -123,9 +123,11 @@ struct fatPrivateInfo {
 int fat16Resolve(struct disk *disk);
 void *fat16open(struct disk *disk, struct pathPart *path, FILE_MODE mode);
 
+int fat16Read(struct disk *disk, void *descriptor, uint32_t size,
+              uint32_t numMemBlocks, char *outPtr);
 struct fileSystem fat16FileSystem = {
 
-    .resolve = fat16Resolve, .open = fat16open};
+    .resolve = fat16Resolve, .open = fat16open, .read = fat16Read};
 
 struct fileSystem *fat16Init() {
   strcpy(fat16FileSystem.name, "FAT16");
@@ -377,7 +379,7 @@ static int fat16ReadInternalFromStream(struct disk *disk,
   int offsetFromCluster = offset % sizeOfClusterInBytes;
   int startingSector = fat16ClusterToSector(private, clusterToUse);
   int startingPosition =
-      (startingSector * disk->sectorSize) * offsetFromCluster;
+      (startingSector * disk->sectorSize) + offsetFromCluster;
   int totalToRead = total > sizeOfClusterInBytes ? sizeOfClusterInBytes : total;
   res = diskStreamerSeek(stream, startingPosition);
   if (res != ALL_OK) {
@@ -506,7 +508,7 @@ struct fatItem *fat16FindItemInDirectory(struct disk *disk,
                                  sizeof(tmpFilename));
     if (istrncmp(tmpFilename, name, sizeof(tmpFilename)) == 0) {
       // all is good
-      fatItem = fat16NewFatItemForDirectoryItem(disk, &directory->item[0]);
+      fatItem = fat16NewFatItemForDirectoryItem(disk, &directory->item[i]);
     }
   }
   return fatItem;
@@ -555,4 +557,25 @@ void *fat16open(struct disk *disk, struct pathPart *path, FILE_MODE mode) {
 
   descriptor->position = 0;
   return descriptor;
+}
+int fat16Read(struct disk *disk, void *descriptor, uint32_t size,
+              uint32_t numMemBlocks, char *outPtr) {
+  int res = 0;
+  struct fatFileDescriptor *fatDescriptor = descriptor;
+  struct fatDirectoryItem *item = fatDescriptor->item->item;
+  int offset = fatDescriptor->position;
+
+  for (uint32_t i = 0; i < numMemBlocks; i++) {
+    res = fat16readInternal(disk, fat16getFirstCluster(item), offset, size,
+                            outPtr);
+    if (ISERR(res)) {
+      goto out;
+    }
+    outPtr += size;
+    offset += size;
+  }
+  // the response should be equal to the total read
+  res = numMemBlocks;
+out:
+  return res;
 }

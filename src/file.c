@@ -166,7 +166,22 @@ int fread(void *ptr, uint32_t size, uint32_t numMemBlocks, int fd) {
   }
 
   res = desc->fileSystem->read(desc->disk, desc->privateData, size,
-                               numMemBlocks, ptr);
+                               numMemBlocks, (char *)ptr);
+
+out:
+  return res;
+}
+
+int fseek(int fd, int offset, FILE_SEEK_MODE mode) {
+  int res = 0;
+
+  struct fileDescriptor *desc = fileGetDescriptor(fd);
+  if (!desc) {
+    res = -EIO;
+    goto out;
+  }
+  res = desc->fileSystem->seek(desc->privateData, offset, mode);
+
 out:
   return res;
 }
