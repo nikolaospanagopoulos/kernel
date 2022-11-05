@@ -47,7 +47,10 @@ void fsInit() {
   memset(fileDescriptors, 0, sizeof(fileDescriptors));
   fsLoad();
 }
-
+static void fileFreeDescriptor(struct fileDescriptor *desc) {
+  fileDescriptors[desc->index - 1] = 0x00;
+  kfree(desc);
+}
 static int fileNewDescriptor(struct fileDescriptor **descriptorOut) {
   int res = -ENOMEM;
 
@@ -172,6 +175,19 @@ out:
   return res;
 }
 
+int fstat(int fd, struct fileStat *stat) {
+  int res = 0;
+  struct fileDescriptor *desc = fileGetDescriptor(fd);
+  if (!desc) {
+    res = -EIO;
+    goto out;
+  }
+  res = desc->fileSystem->stat(desc->disk, desc->privateData, stat);
+
+out:
+  return res;
+}
+
 int fseek(int fd, int offset, FILE_SEEK_MODE mode) {
   int res = 0;
 
@@ -182,6 +198,20 @@ int fseek(int fd, int offset, FILE_SEEK_MODE mode) {
   }
   res = desc->fileSystem->seek(desc->privateData, offset, mode);
 
+out:
+  return res;
+}
+int fclose(int fd) {
+  int res = 0;
+  struct fileDescriptor *desc = fileGetDescriptor(fd);
+  if (!desc) {
+    res = -EIO;
+    goto out;
+  }
+  res = desc->fileSystem->close(desc->privateData);
+  if (res == ALL_OK) {
+    fileFreeDescriptor(desc);
+  }
 out:
   return res;
 }

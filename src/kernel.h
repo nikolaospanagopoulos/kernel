@@ -11,6 +11,7 @@ void terminalPutChar(int x, int y, char c, char colour);
 size_t strlen(const char *str);
 uint16_t terminalMakeChar(char c, char colour);
 void terminalWriteChar(char c, char colour);
+void panic(const char *msg);
 void kernel_main();
 
 #define ERROR(value) (void *)(value)

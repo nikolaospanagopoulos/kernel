@@ -14,6 +14,12 @@ uint16_t terminalRow = 0;
 uint16_t terminalCol = 0;
 uint16_t terminalMakeChar(char c, char colour) { return (colour << 8) | c; }
 
+void panic(const char *msg) {
+  print(msg);
+  while (1) {
+  }
+}
+
 void print(const char *string) {
 
   size_t len = strlen(string);
@@ -54,11 +60,9 @@ void kernel_main() {
 
   int fd = fopen("0:/hello.txt", "r");
   if (fd) {
-    print("\nwe opened hello\n");
-    char buff[13];
-
-    fread(buff, 13, 1, fd);
-    print(buff);
+    struct fileStat stat;
+    fstat(fd, &stat);
+    fclose(fd);
   }
   while (1) {
   }
