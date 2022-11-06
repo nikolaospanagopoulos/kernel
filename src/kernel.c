@@ -1,9 +1,12 @@
 #include "kernel.h"
+#include "config.h"
 #include "disk.h"
 #include "file.h"
+#include "gdt.h"
 #include "idt.h"
 #include "io.h"
 #include "kernelHeap.h"
+#include "memory.h"
 #include "paging.h"
 #include "pparser.h"
 #include "streamer.h"
@@ -30,9 +33,27 @@ void print(const char *string) {
   }
 }
 struct paging4gbChunk *kernel_chunck = 0;
+
+struct gdt gdtReal[TOTAL_GDT_SEGMENTS];
+struct gdtStructured gdtStructured[TOTAL_GDT_SEGMENTS] = {
+
+    // NULL SEGMENT
+    {.base = 0x00, .limit = 0x00, .type = 0x00},
+    // kernel code segment
+    {.base = 0x00, .limit = 0xffffffff, .type = 0x9a},
+    // kernel data segment
+    {.base = 0x00, .limit = 0xffffffff, .type = 0x92}
+
+};
+
 void kernel_main() {
 
   terminalInitialize();
+
+  memset(gdtReal, 0x00, sizeof(gdtReal));
+  gdtStructuredToGdt(gdtReal, gdtStructured, TOTAL_GDT_SEGMENTS);
+  // load gdt
+  gdtLoad(gdtReal, sizeof(gdtReal));
 
   kernelHeapInit();
 
