@@ -22,3 +22,4 @@ int pagingGetIndexes(void *virtualAddress, uint32_t *directoryIndexOut,
                      uint32_t *tableIndexOut);
 bool pagingIsAlligned(void *address);
 int pagingSet(uint32_t *directory, void *virt, uint32_t val);
+void pagingFree4gb(struct paging4gbChunk *chunk);

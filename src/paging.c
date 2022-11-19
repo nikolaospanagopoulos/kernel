@@ -84,3 +84,13 @@ int pagingSet(uint32_t *directory, void *virt, uint32_t val) {
 
   return 0;
 }
+
+void pagingFree4gb(struct paging4gbChunk *chunk) {
+  for (int i = 0; i < PAGING_TOTAL_ENTRIES_PER_TABLE; i++) {
+    uint32_t entry = chunk->directoryEntry[i];
+    uint32_t *table = (uint32_t *)(entry & 0xfffff000);
+    kfree(table);
+  }
+  kfree(chunk->directoryEntry);
+  kfree(chunk);
+}
