@@ -10,6 +10,7 @@
 #include "paging.h"
 #include "pparser.h"
 #include "streamer.h"
+#include "tss.h"
 
 extern void problem();
 uint16_t *videomem = 0;
@@ -33,7 +34,7 @@ void print(const char *string) {
   }
 }
 struct paging4gbChunk *kernel_chunck = 0;
-
+struct tss tss;
 struct gdt gdtReal[TOTAL_GDT_SEGMENTS];
 struct gdtStructured gdtStructured[TOTAL_GDT_SEGMENTS] = {
 
@@ -42,7 +43,13 @@ struct gdtStructured gdtStructured[TOTAL_GDT_SEGMENTS] = {
     // kernel code segment
     {.base = 0x00, .limit = 0xffffffff, .type = 0x9a},
     // kernel data segment
-    {.base = 0x00, .limit = 0xffffffff, .type = 0x92}
+    {.base = 0x00, .limit = 0xffffffff, .type = 0x92},
+    // user code segment
+    {.base = 0x00, .limit = 0xffffffff, .type = 0xf8},
+    // user data segment
+    {.base = 0x00, .limit = 0xffffffff, .type = 0xf2},
+    // tss
+    {.base = (uint32_t)&tss, .limit = sizeof(tss), .type = 0xE9}
 
 };
 
@@ -66,6 +73,12 @@ void kernel_main() {
 
   // initialize interupt descriptor table
   initializeIdt();
+
+  // setup tss
+  memset(&tss, 0x00, sizeof(tss));
+  tss.esp0 = 0x600000;
+  tss.ss0 = dataSelector;
+  tssLoad(0x28);
 
   // create paging directory
   kernel_chunck = pagingNew4gb(PAGING_IS_WRITABLE | PAGING_IS_PRESENT |
