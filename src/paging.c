@@ -94,3 +94,36 @@ void pagingFree4gb(struct paging4gbChunk *chunk) {
   kfree(chunk->directoryEntry);
   kfree(chunk);
 }
+
+int pagingMapTo(uint32_t *directory, void *virt, void *physical, void *physEnd,
+                int flags) {
+  int res = 0;
+
+  if ((uint32_t)virt % PAGING_PAGE_SIZE) {
+    res = -EINVARG;
+    goto out;
+  }
+
+  if ((uint32_t)physical % PAGING_PAGE_SIZE) {
+    res = -EINVARG;
+    goto out;
+  }
+  if ((uint32_t)physEnd % PAGING_PAGE_SIZE) {
+    res = -EINVARG;
+    goto out;
+  }
+  if ((uint32_t)physEnd < (uint32_t)physical) {
+    res = -EINVARG;
+    goto out;
+  }
+
+  uint32_t totalBytes = physEnd - physical;
+
+  int totalPages = totalBytes / PAGING_PAGE_SIZE;
+
+  res = pagingMapRange(directory, virt, physical, totalPages, flags);
+
+out:
+
+  return res;
+}

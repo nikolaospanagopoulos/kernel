@@ -11,3 +11,4 @@ char *strcpy(char *dest, const char *src);
 char toLower(char s1);
 int strnlenTerminator(const char *str, int max, char terminator);
 int istrncmp(const char *s1, const char *s2, int numOfBytes);
+char *strncpy(char *dest, const char *src, int count);
