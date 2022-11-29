@@ -22,13 +22,8 @@ struct process *processCurrent() {
 }
 
 struct process *processGet(int index) {
-  int res = 0;
   if (index < 0 || index >= MAX_PROCESSES) {
-    res = -EINVARG;
-  }
-out:
-  if (ISERR(res)) {
-    return ERROR(res);
+    return NULL;
   }
   return processes[index];
 }
@@ -71,10 +66,43 @@ static int processLoadData(const char *filename, struct process *process) {
 
   return res;
 }
+int processMapBinary(struct process *process) {
+  int res = 0;
+
+  pagingMapTo(process->task->pageDirectory->directoryEntry,
+              (void *)PROGRAM_VIRTUAL_ADDRESS, process->ptr,
+              pagingAlignAddress(process->ptr + process->size),
+              PAGING_IS_PRESENT | PAGING_ACCESS_FROM_ALL | PAGING_IS_WRITABLE);
+
+  return res;
+}
 int processMapMemory(struct process *process) {
   int res = 0;
   res = processMapBinary(process);
+  return res;
 }
+
+int processGetFreeSlot() {
+  for (int i = 0; i < MAX_PROCESSES; i++) {
+    if (processes[i] == 0) {
+      return i;
+    }
+  }
+  return -EISTKN;
+}
+
+int processLoad(const char *filename, struct process **process) {
+  int res = 0;
+  int processSlot = processGetFreeSlot();
+  if (processSlot < 0) {
+    res = -EISTKN;
+    goto out;
+  }
+  res = processLoadForSlot(filename, process, processSlot);
+out:
+  return res;
+}
+
 int processLoadForSlot(const char *filename, struct process **process,
                        int processSlot) {
   int res = 0;
@@ -109,7 +137,7 @@ int processLoadForSlot(const char *filename, struct process **process,
     res = ERROR_I(task);
   }
   _process->task = task;
-  res = processMapMemory(process);
+  res = processMapMemory(_process);
   if (res < 0) {
     goto out;
   }

@@ -25,3 +25,7 @@ int pagingSet(uint32_t *directory, void *virt, uint32_t val);
 void pagingFree4gb(struct paging4gbChunk *chunk);
 int pagingMapTo(uint32_t *directory, void *virt, void *physical, void *psysEnd,
                 int flags);
+int pagingMapRange(uint32_t *directory, void *virt, void *phys, int count,
+                   int flags);
+int pagingMap(uint32_t *directory, void *virt, void *phys, int flags);
+void *pagingAlignAddress(void *ptr);

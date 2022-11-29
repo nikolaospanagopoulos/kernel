@@ -4,6 +4,15 @@
 #include "status.h"
 #include <stdint.h>
 
+void *pagingAlignAddress(void *ptr) {
+  if ((uint32_t)ptr % PAGING_PAGE_SIZE) {
+    return (void *)((uint32_t)ptr + PAGING_PAGE_SIZE -
+                    ((uint32_t)ptr % PAGING_PAGE_SIZE));
+  }
+
+  return ptr;
+}
+
 void paging_load_directory(uint32_t *directory);
 static uint32_t *currentDirectory = 0;
 struct paging4gbChunk *pagingNew4gb(uint8_t flags) {
@@ -95,6 +104,28 @@ void pagingFree4gb(struct paging4gbChunk *chunk) {
   kfree(chunk);
 }
 
+int pagingMap(uint32_t *directory, void *virt, void *phys, int flags) {
+  if (((unsigned int)virt % PAGING_PAGE_SIZE) ||
+      ((unsigned int)phys % PAGING_PAGE_SIZE)) {
+    return -EINVARG;
+  }
+  return pagingSet(directory, virt, (uint32_t)phys | flags);
+}
+
+int pagingMapRange(uint32_t *directory, void *virt, void *phys, int count,
+                   int flags) {
+  int res = 0;
+  for (int i = 0; i < count; i++) {
+
+    res = pagingMap(directory, virt, phys, flags);
+    if (res == 0) {
+      break;
+      virt += PAGING_PAGE_SIZE;
+      phys += PAGING_PAGE_SIZE;
+    }
+  }
+  return res;
+}
 int pagingMapTo(uint32_t *directory, void *virt, void *physical, void *physEnd,
                 int flags) {
   int res = 0;

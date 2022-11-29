@@ -17,3 +17,5 @@ struct process {
   // the size of the data pointed to by ptr
   uint32_t size;
 };
+int processLoadForSlot(const char *filename, struct process **process,
+                       int processSlot);

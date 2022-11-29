@@ -14,7 +14,7 @@ struct task *taskCurrent() {
   return currentTask;
 }
 
-struct task *taskNew() {
+struct task *taskNew(struct process *process) {
   int res = 0;
   struct task *task = kzalloc(sizeof(struct task));
 
@@ -22,7 +22,7 @@ struct task *taskNew() {
     goto out;
   }
 
-  res = taskInit(task);
+  res = taskInit(task, process);
   if (res != ALL_OK) {
     goto out;
   }
@@ -70,7 +70,7 @@ int taskFree(struct task *task) {
   kfree(task);
   return 0;
 }
-int taskInit(struct task *task) {
+int taskInit(struct task *task, struct process *process) {
   memset(task, 0, sizeof(struct task));
   task->pageDirectory =
       pagingNew4gb(PAGING_IS_PRESENT | PAGING_ACCESS_FROM_ALL);
@@ -84,5 +84,6 @@ int taskInit(struct task *task) {
 
   task->registers.ss = USER_DATA_SEGMENT;
   task->registers.esp = PROGRAM_VIRTUAL_STACK_ADDRESS_START;
+  task->process = process;
   return 0;
 }
