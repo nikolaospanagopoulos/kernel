@@ -35,6 +35,12 @@ struct task {
   struct task *previous; // previous task
 };
 
+void runFirstEverTask();
+int taskPage();
 struct task *taskNew(struct process *process);
 int taskInit(struct task *task, struct process *process);
 int taskFree(struct task *task);
+void restoreGeneralPurposeRegisters(struct registers *registers);
+void taskReturn(struct registers *registers);
+void userRegisters();
+int taskSwitch(struct task *task);

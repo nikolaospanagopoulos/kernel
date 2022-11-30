@@ -135,6 +135,7 @@ int processLoadForSlot(const char *filename, struct process **process,
   task = taskNew(_process);
   if (ERROR_I(task) == 0) {
     res = ERROR_I(task);
+    goto out;
   }
   _process->task = task;
   res = processMapMemory(_process);

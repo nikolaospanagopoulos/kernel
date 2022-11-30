@@ -5,8 +5,6 @@
 #include "status.h"
 // current task
 struct task *currentTask = 0;
-
-// LL
 struct task *taskTail = 0;
 struct task *taskHead = 0;
 
@@ -30,6 +28,7 @@ struct task *taskNew(struct process *process) {
   if (taskHead == 0) {
     taskHead = task;
     taskTail = task;
+    currentTask = task;
     goto out;
   }
   taskTail->next = task;
@@ -84,6 +83,26 @@ int taskInit(struct task *task, struct process *process) {
 
   task->registers.ss = USER_DATA_SEGMENT;
   task->registers.esp = PROGRAM_VIRTUAL_STACK_ADDRESS_START;
+  task->registers.cs = USER_CODE_SEGMENT;
   task->process = process;
   return 0;
+}
+int taskSwitch(struct task *task) {
+  currentTask = task;
+  pagingSwitch(task->pageDirectory->directoryEntry);
+  return 0;
+}
+
+int taskPage() {
+  userRegisters();
+  taskSwitch(currentTask);
+  return 0;
+}
+
+void runFirstEverTask() {
+  if (!currentTask) {
+    panic("no current task");
+  }
+  taskSwitch(taskHead);
+  taskReturn(&taskHead->registers);
 }

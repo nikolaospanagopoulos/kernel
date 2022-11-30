@@ -9,7 +9,10 @@
 #include "memory.h"
 #include "paging.h"
 #include "pparser.h"
+#include "process.h"
+#include "status.h"
 #include "streamer.h"
+#include "task.h"
 #include "tss.h"
 
 extern void problem();
@@ -89,15 +92,14 @@ void kernel_main() {
   // enable paging
   enable_paging();
 
-  // enable interrupts
-  enable_interrupts();
+  struct process *process = 0;
 
-  int fd = fopen("0:/hello.txt", "r");
-  if (fd) {
-    struct fileStat stat;
-    fstat(fd, &stat);
-    fclose(fd);
+  int res = processLoad("0:/blank.bin", &process);
+  if (res != ALL_OK) {
+    panic("failed to load process");
   }
+
+  runFirstEverTask();
   while (1) {
   }
 }

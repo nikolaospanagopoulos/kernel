@@ -19,3 +19,4 @@ struct process {
 };
 int processLoadForSlot(const char *filename, struct process **process,
                        int processSlot);
+int processLoad(const char *filename, struct process **process);
