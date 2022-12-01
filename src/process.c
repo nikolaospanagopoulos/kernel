@@ -69,9 +69,8 @@ static int processLoadData(const char *filename, struct process *process) {
 int processMapBinary(struct process *process) {
   int res = 0;
 
-  pagingMapTo(process->task->pageDirectory->directoryEntry,
-              (void *)PROGRAM_VIRTUAL_ADDRESS, process->ptr,
-              pagingAlignAddress(process->ptr + process->size),
+  pagingMapTo(process->task->pageDirectory, (void *)PROGRAM_VIRTUAL_ADDRESS,
+              process->ptr, pagingAlignAddress(process->ptr + process->size),
               PAGING_IS_PRESENT | PAGING_ACCESS_FROM_ALL | PAGING_IS_WRITABLE);
 
   return res;

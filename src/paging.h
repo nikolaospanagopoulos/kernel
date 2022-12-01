@@ -15,7 +15,7 @@ struct paging4gbChunk {
 };
 
 struct paging4gbChunk *pagingNew4gb(uint8_t flags);
-void pagingSwitch(uint32_t *directory);
+void pagingSwitch(struct paging4gbChunk *directory);
 uint32_t *get4GbchunckDirectory(struct paging4gbChunk *chunk);
 void enable_paging();
 int pagingGetIndexes(void *virtualAddress, uint32_t *directoryIndexOut,
@@ -23,9 +23,10 @@ int pagingGetIndexes(void *virtualAddress, uint32_t *directoryIndexOut,
 bool pagingIsAlligned(void *address);
 int pagingSet(uint32_t *directory, void *virt, uint32_t val);
 void pagingFree4gb(struct paging4gbChunk *chunk);
-int pagingMapTo(uint32_t *directory, void *virt, void *physical, void *psysEnd,
-                int flags);
-int pagingMapRange(uint32_t *directory, void *virt, void *phys, int count,
-                   int flags);
-int pagingMap(uint32_t *directory, void *virt, void *phys, int flags);
+int pagingMapTo(struct paging4gbChunk *directory, void *virt, void *physical,
+                void *psysEnd, int flags);
+int pagingMapRange(struct paging4gbChunk *directory, void *virt, void *phys,
+                   int count, int flags);
+int pagingMap(struct paging4gbChunk *directory, void *virt, void *phys,
+              int flags);
 void *pagingAlignAddress(void *ptr);

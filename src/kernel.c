@@ -87,7 +87,7 @@ void kernel_main() {
   kernel_chunck = pagingNew4gb(PAGING_IS_WRITABLE | PAGING_IS_PRESENT |
                                PAGING_ACCESS_FROM_ALL);
   // switch to kernel paging directory
-  pagingSwitch(get4GbchunckDirectory(kernel_chunck));
+  pagingSwitch(kernel_chunck);
 
   // enable paging
   enable_paging();

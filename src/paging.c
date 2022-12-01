@@ -41,9 +41,9 @@ uint32_t *get4GbchunckDirectory(struct paging4gbChunk *chunk) {
   return chunk->directoryEntry;
 }
 
-void pagingSwitch(uint32_t *directory) {
-  paging_load_directory(directory);
-  currentDirectory = directory;
+void pagingSwitch(struct paging4gbChunk *directory) {
+  paging_load_directory(directory->directoryEntry);
+  currentDirectory = directory->directoryEntry;
 }
 
 int pagingGetIndexes(void *virtualAddress, uint32_t *directoryIndexOut,
@@ -104,16 +104,17 @@ void pagingFree4gb(struct paging4gbChunk *chunk) {
   kfree(chunk);
 }
 
-int pagingMap(uint32_t *directory, void *virt, void *phys, int flags) {
+int pagingMap(struct paging4gbChunk *directory, void *virt, void *phys,
+              int flags) {
   if (((unsigned int)virt % PAGING_PAGE_SIZE) ||
       ((unsigned int)phys % PAGING_PAGE_SIZE)) {
     return -EINVARG;
   }
-  return pagingSet(directory, virt, (uint32_t)phys | flags);
+  return pagingSet(directory->directoryEntry, virt, (uint32_t)phys | flags);
 }
 
-int pagingMapRange(uint32_t *directory, void *virt, void *phys, int count,
-                   int flags) {
+int pagingMapRange(struct paging4gbChunk *directory, void *virt, void *phys,
+                   int count, int flags) {
   int res = 0;
   for (int i = 0; i < count; i++) {
 
@@ -126,8 +127,8 @@ int pagingMapRange(uint32_t *directory, void *virt, void *phys, int count,
   }
   return res;
 }
-int pagingMapTo(uint32_t *directory, void *virt, void *physical, void *physEnd,
-                int flags) {
+int pagingMapTo(struct paging4gbChunk *directory, void *virt, void *physical,
+                void *physEnd, int flags) {
   int res = 0;
 
   if ((uint32_t)virt % PAGING_PAGE_SIZE) {

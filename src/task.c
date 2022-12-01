@@ -89,7 +89,7 @@ int taskInit(struct task *task, struct process *process) {
 }
 int taskSwitch(struct task *task) {
   currentTask = task;
-  pagingSwitch(task->pageDirectory->directoryEntry);
+  pagingSwitch(task->pageDirectory);
   return 0;
 }
 
