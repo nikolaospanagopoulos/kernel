@@ -64,7 +64,7 @@ void *isr80hHandleCommand(int command, struct interruptFrame *frame) {
 }
 
 void isr80RegisterCommand(int commandId, ISR80H_COMMAND command) {
-  if (commandId <= 0 || commandId >= MAX_ISR80_COMMANDS) {
+  if (commandId < 0 || commandId >= MAX_ISR80_COMMANDS) {
     panic("command out of bounds");
   }
   if (isr80hCommands[commandId]) {

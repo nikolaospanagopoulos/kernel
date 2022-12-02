@@ -5,6 +5,7 @@
 #include "gdt.h"
 #include "idt.h"
 #include "io.h"
+#include "isr80h.h"
 #include "kernelHeap.h"
 #include "memory.h"
 #include "paging.h"
@@ -91,6 +92,10 @@ void kernel_main() {
 
   // enable paging
   enable_paging();
+
+  // register kernel commands
+
+  isr80hRegisterCommands();
 
   struct process *process = 0;
 
