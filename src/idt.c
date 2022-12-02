@@ -3,7 +3,11 @@
 #include "io.h"
 #include "kernel.h"
 #include "memory.h"
+#include "task.h"
 idtDesc intDescriptors[osTotalInterupts];
+
+static ISR80H_COMMAND isr80hCommands[MAX_ISR80_COMMANDS];
+extern void isr80hWrapper();
 extern void int0h();
 extern void int21h();
 extern void idt_load(void *ptr);
@@ -38,5 +42,45 @@ void initializeIdt() {
 
   idtSet(0, int0h);
   idtSet(0x21, int21h);
+  idtSet(0x80, isr80hWrapper);
   idt_load(&idtrDescriptor);
+}
+
+void *isr80hHandleCommand(int command, struct interruptFrame *frame) {
+
+  void *result = 0;
+
+  if (command <= 0 || command >= MAX_ISR80_COMMANDS) {
+    return 0;
+  }
+  ISR80H_COMMAND commandFunc = isr80hCommands[command];
+  if (!commandFunc) {
+    // not an error
+    return 0;
+  }
+
+  result = commandFunc(frame);
+  return result;
+}
+
+void isr80RegisterCommand(int commandId, ISR80H_COMMAND command) {
+  if (commandId <= 0 || commandId >= MAX_ISR80_COMMANDS) {
+    panic("command out of bounds");
+  }
+  if (isr80hCommands[commandId]) {
+    panic("you are attempting to overwrite an existing command");
+  }
+  isr80hCommands[commandId] = command;
+}
+
+void *isr80handler(int command, struct interruptFrame *frame) {
+  void *res = 0;
+  kernelPage();
+
+  taskSaveCurrentState(frame);
+  res = isr80hHandleCommand(command, frame);
+
+  taskPage();
+
+  return res;
 }

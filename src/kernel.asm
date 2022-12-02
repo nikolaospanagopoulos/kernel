@@ -1,5 +1,6 @@
 [BITS 32]
 
+global kenrelRegisters
 global _start
 global problem
 extern kernel_main
@@ -30,6 +31,11 @@ _start:
    
    call kernel_main
    jmp $
-problem:
-     int 0
+kenrelRegisters:
+   mov ax, 10
+   mov ds, ax
+   mov es, ax
+   mov gs, ax
+   mov fs, ax
+   ret
 times 512- ($ - $$ ) db 0 ;allign assembly and c assembly

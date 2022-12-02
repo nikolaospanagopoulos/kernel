@@ -1,10 +1,11 @@
 #pragma once
 
 #include "config.h"
+#include "idt.h"
 #include "paging.h"
 #include "process.h"
 #include "stdint.h"
-
+struct interruptFrame;
 struct registers {
 
   uint32_t edi;
@@ -44,3 +45,4 @@ void restoreGeneralPurposeRegisters(struct registers *registers);
 void taskReturn(struct registers *registers);
 void userRegisters();
 int taskSwitch(struct task *task);
+void taskSaveCurrentState(struct interruptFrame *frame);

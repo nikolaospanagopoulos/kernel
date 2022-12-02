@@ -106,3 +106,29 @@ void runFirstEverTask() {
   taskSwitch(taskHead);
   taskReturn(&taskHead->registers);
 }
+
+void taskSaveState(struct task *task, struct interruptFrame *frame) {
+
+  task->registers.ip = frame->ip;
+  task->registers.cs = frame->cs;
+  task->registers.flags = frame->flags;
+  task->registers.esp = frame->esp;
+  task->registers.ss = frame->ss;
+  task->registers.eax = frame->eax;
+  task->registers.ebp = frame->ebp;
+  task->registers.ebx = frame->ebx;
+  task->registers.ecx = frame->ecx;
+  task->registers.edi = frame->edi;
+  task->registers.edx = frame->edx;
+  task->registers.esi = frame->esi;
+}
+
+void taskSaveCurrentState(struct interruptFrame *frame) {
+  if (!taskCurrent()) {
+    panic("no task to save \n");
+  }
+
+  struct task *task = taskCurrent();
+
+  taskSaveState(task, frame);
+}

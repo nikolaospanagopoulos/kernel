@@ -3,6 +3,8 @@ section .asm
 extern int21h_handler
 extern int0h_handler
 extern no_interrupt_handler
+extern isr80handler
+global isr80hWrapper
 global int21h
 global int0h
 global no_interrupt
@@ -44,4 +46,24 @@ no_interrupt:
 	popad
 	sti
 	iret
+isr80hWrapper:
+   ;push the general purpose registers
+   pushad
+   ;interupt frame ends
+   ;push stack pointer that points to interupt frame
+   push esp
+   push eax
+   call isr80handler
+   ;put return address from eax to temp var
+   mov dword[tmpRes], eax
+   ;restore st pointer
+   add esp, 8
+   ;restore general purpose registers for userland
+   popad
+   mov eax, [tmpRes]
+   iretd
+
+
+section .data
+tmpRes: dd 0 ;here we store return result from isr80handler
 

@@ -136,3 +136,7 @@ void terminalInitialize() {
     }
   }
 }
+void kernelPage() {
+  kenrelRegisters();
+  pagingSwitch(kernel_chunck);
+}
