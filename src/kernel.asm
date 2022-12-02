@@ -32,7 +32,7 @@ _start:
    call kernel_main
    jmp $
 kenrelRegisters:
-   mov ax, 10
+   mov ax, 0x10
    mov ds, ax
    mov es, ax
    mov gs, ax

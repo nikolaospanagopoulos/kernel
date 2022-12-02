@@ -26,25 +26,19 @@ idt_load:
 	ret
 
 int21h:
-	cli
     pushad
 	call int21h_handler
 	popad
-	sti
 	iret
 int0h:
-	cli
     pushad
 	call int0h_handler
 	popad
-	sti
 	iret
 no_interrupt:
-	cli
     pushad
 	call no_interrupt_handler
 	popad
-	sti
 	iret
 isr80hWrapper:
    ;push the general purpose registers
