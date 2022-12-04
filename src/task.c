@@ -2,7 +2,9 @@
 #include "kernel.h"
 #include "kernelHeap.h"
 #include "memory.h"
+#include "paging.h"
 #include "status.h"
+#include "string.h"
 // current task
 struct task *currentTask = 0;
 struct task *taskTail = 0;
@@ -131,4 +133,40 @@ void taskSaveCurrentState(struct interruptFrame *frame) {
   struct task *task = taskCurrent();
 
   taskSaveState(task, frame);
+}
+int copyStringFromTask(struct task *task, void *virtualP, void *phys, int max) {
+  if (max >= PAGING_PAGE_SIZE) {
+    return -EINVARG;
+  }
+  int res = 0;
+
+  char *tmp = kzalloc(max);
+
+  if (!tmp) {
+    res = -ENOMEM;
+    goto out;
+  }
+
+  struct paging4gbChunk *taskDirectory = task->pageDirectory;
+  uint32_t oldEntry = pagingGet(taskDirectory->directoryEntry, tmp);
+  pagingMap(taskDirectory, virtualP, phys,
+            PAGING_IS_WRITABLE | PAGING_IS_PRESENT | PAGING_ACCESS_FROM_ALL);
+  pagingSwitch(task->pageDirectory);
+  strncpy(tmp, virtualP, max);
+  kernelPage();
+
+  res = pagingSet(taskDirectory->directoryEntry, tmp, oldEntry);
+
+  if (res < 0) {
+    res = -EIO;
+    goto outFree;
+  }
+
+  strncpy(phys, tmp, max);
+
+outFree:
+  kfree(tmp);
+
+out:
+  return res;
 }

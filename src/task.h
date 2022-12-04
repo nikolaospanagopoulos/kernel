@@ -46,3 +46,4 @@ void taskReturn(struct registers *registers);
 void userRegisters();
 int taskSwitch(struct task *task);
 void taskSaveCurrentState(struct interruptFrame *frame);
+int copyStringFromTask(struct task *task, void *virtualP, void *phys, int max);

@@ -41,6 +41,7 @@ void initializeIdt() {
   }
 
   idtSet(0, int0h);
+  idtSet(0x21, int21h);
   idtSet(0x80, isr80hWrapper);
   idt_load(&idtrDescriptor);
 }

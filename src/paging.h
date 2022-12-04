@@ -30,3 +30,4 @@ int pagingMapRange(struct paging4gbChunk *directory, void *virt, void *phys,
 int pagingMap(struct paging4gbChunk *directory, void *virt, void *phys,
               int flags);
 void *pagingAlignAddress(void *ptr);
+uint32_t pagingGet(uint32_t *directory, void *virt);

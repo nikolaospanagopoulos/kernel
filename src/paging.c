@@ -119,11 +119,11 @@ int pagingMapRange(struct paging4gbChunk *directory, void *virt, void *phys,
   for (int i = 0; i < count; i++) {
 
     res = pagingMap(directory, virt, phys, flags);
-    if (res == 0) {
+    if (res < 0) {
       break;
-      virt += PAGING_PAGE_SIZE;
-      phys += PAGING_PAGE_SIZE;
     }
+    virt += PAGING_PAGE_SIZE;
+    phys += PAGING_PAGE_SIZE;
   }
   return res;
 }
@@ -158,4 +158,12 @@ int pagingMapTo(struct paging4gbChunk *directory, void *virt, void *physical,
 out:
 
   return res;
+}
+uint32_t pagingGet(uint32_t *directory, void *virt) {
+  uint32_t directoryIndex = 0;
+  uint32_t tableIndex = 0;
+  pagingGetIndexes(virt, &directoryIndex, &tableIndex);
+  uint32_t entry = directory[directoryIndex];
+  uint32_t *table = (uint32_t *)(entry & 0xfffff000);
+  return table[tableIndex];
 }
