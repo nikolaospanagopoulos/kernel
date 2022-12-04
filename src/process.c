@@ -78,6 +78,14 @@ int processMapBinary(struct process *process) {
 int processMapMemory(struct process *process) {
   int res = 0;
   res = processMapBinary(process);
+  if (res < 0) {
+    goto out;
+  }
+  pagingMapTo(process->task->pageDirectory,
+              (void *)PROGRAM_VIRTUAL_STACK_ADDRESS_END, process->stack,
+              pagingAlignAddress(process->stack + PROGRAM_STACK_SIZE),
+              PAGING_IS_PRESENT | PAGING_ACCESS_FROM_ALL | PAGING_IS_WRITABLE);
+out:
   return res;
 }
 

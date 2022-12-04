@@ -7,6 +7,7 @@
 #include "io.h"
 #include "isr80h.h"
 #include "kernelHeap.h"
+#include "keyboard.h"
 #include "memory.h"
 #include "paging.h"
 #include "pparser.h"
@@ -97,6 +98,9 @@ void kernel_main() {
 
   isr80hRegisterCommands();
 
+  // initialize keyboards
+
+  keyboardInit();
   struct process *process = 0;
 
   int res = processLoad("0:/blank.bin", &process);

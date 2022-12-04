@@ -170,3 +170,22 @@ outFree:
 out:
   return res;
 }
+
+int taskPageTask(struct task *task) {
+  userRegisters();
+  pagingSwitch(task->pageDirectory);
+  return 0;
+}
+void *taskGetTaskItem(struct task *task, int index) {
+  void *result = 0;
+  uint32_t *spPtr = (uint32_t *)task->registers.esp;
+  // switch to the given tasks page (not the current one)
+
+  taskPageTask(task);
+
+  result = (void *)spPtr[index];
+
+  // switch back to kernel
+  kernelPage();
+  return result;
+}
