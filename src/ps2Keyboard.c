@@ -1,5 +1,8 @@
 #include "ps2Keyboard.h"
+#include "idt.h"
 #include "io.h"
+#include "kernel.h"
+#include "task.h"
 #include <stddef.h>
 #include <stdint.h>
 
@@ -18,9 +21,9 @@ static uint8_t keyboardScanSetOne[] = {
 struct keyboard ps2Keyboard = {.name = "Classic", .init = ps2KeyboardInit};
 
 int ps2KeyboardInit() {
-
+  idtRegisterInterruptCallback(ISR_KEYBOARD_INTERRUPT,
+                               ps2KeyboardHandleInterrupt);
   outb(PS2_PORT, PS2_COMMAND_ENABLE);
-
   return 0;
 }
 
@@ -37,4 +40,20 @@ uint8_t ps2KeyboardScandcodeToChar(uint8_t scancode) {
 
 struct keyboard *ps2Init() {
   return &ps2Keyboard;
+}
+void ps2KeyboardHandleInterrupt() {
+  kernelPage();
+  uint8_t scancode = 0;
+  scancode = insb(KEYBOARD_INPUT_PORT);
+  insb(KEYBOARD_INPUT_PORT);
+
+  if (scancode & PS2_KEYBOARD_KEY_RELEASED) {
+    return;
+  }
+
+  uint8_t c = ps2KeyboardScandcodeToChar(scancode);
+  if (c != 0) {
+    keyboardPush(c);
+  }
+  taskPage();
 }

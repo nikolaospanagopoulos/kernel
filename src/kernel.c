@@ -57,7 +57,6 @@ struct gdtStructured gdtStructured[TOTAL_GDT_SEGMENTS] = {
     {.base = (uint32_t)&tss, .limit = sizeof(tss), .type = 0xE9}
 
 };
-void keyboardInterrupt() { print("key pressed"); }
 void kernel_main() {
 
   terminalInitialize();
@@ -102,11 +101,9 @@ void kernel_main() {
 
   keyboardInit();
 
-  idtRegisterInterruptCallback(0x21, keyboardInterrupt);
-
   struct process *process = 0;
 
-  int res = processLoad("0:/blank.bin", &process);
+  int res = processLoadSwitch("0:/blank.bin", &process);
   if (res != ALL_OK) {
     panic("failed to load process");
   }
@@ -121,11 +118,28 @@ void terminalPutChar(int x, int y, char c, char colour) {
   videomem[(y * VGA_WIDTH) + x] = terminalMakeChar(c, colour);
 }
 
+void teminalBackspace() {
+  if (terminalRow == 0 && terminalCol == 0) {
+    return;
+  }
+  if (terminalCol == 0) {
+    terminalRow -= 1;
+    terminalCol = VGA_WIDTH;
+  }
+  terminalCol -= 1;
+  terminalWriteChar(' ', 15);
+  terminalCol -= 1;
+}
+
 void terminalWriteChar(char c, char colour) {
 
   if (c == '\n') {
     terminalRow += 1;
     terminalCol = 0;
+    return;
+  }
+  if (c == 0x08) {
+    teminalBackspace();
     return;
   }
   terminalPutChar(terminalCol, terminalRow, c, colour);

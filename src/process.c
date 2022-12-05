@@ -21,6 +21,12 @@ struct process *processCurrent() {
   return currentProcess;
 }
 
+int processSwitch(struct process *process) {
+  currentProcess = process;
+
+  return 0;
+}
+
 struct process *processGet(int index) {
   if (index < 0 || index >= MAX_PROCESSES) {
     return NULL;
@@ -107,6 +113,15 @@ int processLoad(const char *filename, struct process **process) {
   }
   res = processLoadForSlot(filename, process, processSlot);
 out:
+  return res;
+}
+
+int processLoadSwitch(const char *filename, struct process **process) {
+  int res = processLoad(filename, process);
+
+  if (res == ALL_OK) {
+    processSwitch(*process);
+  }
   return res;
 }
 

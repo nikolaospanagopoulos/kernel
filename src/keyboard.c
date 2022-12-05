@@ -43,6 +43,9 @@ void keyboardPush(char c) {
   if (!process) {
     return;
   }
+  if (c == 0) {
+    return;
+  }
   int realIndex = keyboardGetTailIndex(process);
   process->keyboard.buffer[realIndex] = c;
   process->keyboard.tail++;

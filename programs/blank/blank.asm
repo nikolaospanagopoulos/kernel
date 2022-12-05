@@ -5,13 +5,20 @@ section .asm
 global _start
 
 _start:
-
-    push message
-	mov eax ,1
+loop:
+	call getKey
+	push eax
+	mov eax ,3
 	int 0x80
 	add esp,4
+	jmp loop
 
-	jmp $
+getKey:
+    mov eax, 2
+	int 0x80
+	cmp eax, 0x00
+	je getKey
+	ret
 
 section .data
 message: db 'Hello!', 0

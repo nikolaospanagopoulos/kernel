@@ -635,7 +635,6 @@ int fat16Stat(struct disk *disk, void *privateData, struct fileStat *stat) {
   struct fatItem *descItem = descriptor->item;
   if (descItem->type != FAT_ITEM_TYPE_FILE) {
     res = -EINVARG;
-    print("nikos");
     goto out;
   }
   struct fatDirectoryItem *ritem = descItem->item;
