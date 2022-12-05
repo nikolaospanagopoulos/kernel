@@ -14,4 +14,4 @@ _start:
 	jmp $
 
 section .data
-message: db 'Hello world', 0
+message: db 'Hello!', 0

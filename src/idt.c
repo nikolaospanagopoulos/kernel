@@ -3,10 +3,15 @@
 #include "io.h"
 #include "kernel.h"
 #include "memory.h"
+#include "status.h"
 #include "task.h"
 idtDesc intDescriptors[osTotalInterupts];
 
 static ISR80H_COMMAND isr80hCommands[MAX_ISR80_COMMANDS];
+extern void *interruptPointerTable[osTotalInterupts];
+
+static INTERRUPT_CALLBACK_FUNCTON interruptCallbacks[osTotalInterupts];
+
 extern void isr80hWrapper();
 extern void int0h();
 extern void int21h();
@@ -14,13 +19,30 @@ extern void idt_load(void *ptr);
 extern void no_interrupt();
 struct idtrDesc idtrDescriptor;
 
-void int21h_handler() {
-  print("key pressed");
-  outb(0x20, 0x20);
-}
 void no_interrupt_handler() { outb(0x20, 0x20); }
 
+void interruptHandler(int interrupt, struct interruptFrame *frame) {
+
+  kernelPage();
+  if (interruptCallbacks[interrupt] != 0) {
+    taskSaveCurrentState(frame);
+    interruptCallbacks[interrupt](frame);
+  }
+  taskPage();
+  outb(0x20, 0x20);
+}
+
 void int0h_handler() { print("devide by zero error"); }
+
+int idtRegisterInterruptCallback(int interrupt,
+                                 INTERRUPT_CALLBACK_FUNCTON callback) {
+  if (interrupt < 0 || interrupt >= osTotalInterupts) {
+    return -EINVARG;
+  }
+  interruptCallbacks[interrupt] = callback;
+
+  return 0;
+}
 
 void idtSet(int interuptNumber, void *address) {
 
@@ -37,11 +59,10 @@ void initializeIdt() {
   idtrDescriptor.limit = sizeof(intDescriptors) - 1;
   idtrDescriptor.base = (uint32_t)intDescriptors;
   for (int i = 0; i < 512; i++) {
-    idtSet(i, no_interrupt);
+    idtSet(i, interruptPointerTable[i]);
   }
 
   idtSet(0, int0h);
-  idtSet(0x21, int21h);
   idtSet(0x80, isr80hWrapper);
   idt_load(&idtrDescriptor);
 }

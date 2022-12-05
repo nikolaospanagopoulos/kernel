@@ -1,11 +1,11 @@
 section .asm
-
+extern interruptHandler
 extern int21h_handler
 extern int0h_handler
 extern no_interrupt_handler
 extern isr80handler
+global interruptPointerTable
 global isr80hWrapper
-global int21h
 global int0h
 global no_interrupt
 global idt_load
@@ -25,11 +25,6 @@ idt_load:
 	pop ebp
 	ret
 
-int21h:
-    pushad
-	call int21h_handler
-	popad
-	iret
 int0h:
     pushad
 	call int0h_handler
@@ -40,6 +35,27 @@ no_interrupt:
 	call no_interrupt_handler
 	popad
 	iret
+
+
+%macro interrupt 1
+    global int%1
+	int%1:
+	    pushad
+		push esp
+		push dword %1
+		call interruptHandler
+		add esp, 8
+		popad
+		iret
+%endmacro
+
+%assign i 0
+%rep 512
+    interrupt i
+%assign i i+1
+%endrep
+
+
 isr80hWrapper:
    ;push the general purpose registers
    pushad
@@ -61,3 +77,13 @@ isr80hWrapper:
 section .data
 tmpRes: dd 0 ;here we store return result from isr80handler
 
+%macro interuptArrayEntry 1
+    dd int%1
+%endmacro
+
+interruptPointerTable:
+%assign  i 0
+%rep 512
+    interuptArrayEntry i
+%assign i i+1
+%endrep

@@ -57,7 +57,7 @@ struct gdtStructured gdtStructured[TOTAL_GDT_SEGMENTS] = {
     {.base = (uint32_t)&tss, .limit = sizeof(tss), .type = 0xE9}
 
 };
-
+void keyboardInterrupt() { print("key pressed"); }
 void kernel_main() {
 
   terminalInitialize();
@@ -101,6 +101,9 @@ void kernel_main() {
   // initialize keyboards
 
   keyboardInit();
+
+  idtRegisterInterruptCallback(0x21, keyboardInterrupt);
+
   struct process *process = 0;
 
   int res = processLoad("0:/blank.bin", &process);

@@ -4,6 +4,7 @@
 struct interruptFrame;
 
 typedef void *(*ISR80H_COMMAND)(struct interruptFrame *frame);
+typedef void (*INTERRUPT_CALLBACK_FUNCTON)();
 
 typedef struct idtDesc {
   uint16_t offset_1;
@@ -45,3 +46,5 @@ struct interruptFrame {
 } __attribute__((packed));
 
 void isr80RegisterCommand(int commandId, ISR80H_COMMAND command);
+int idtRegisterInterruptCallback(int interrupt,
+                                 INTERRUPT_CALLBACK_FUNCTON callback);
