@@ -1,12 +1,13 @@
 #include "keyboard.h"
 #include "process.h"
+#include "ps2Keyboard.h"
 #include "status.h"
 #include "task.h"
 
 static struct keyboard *keyboardListHead = 0;
 static struct keyboard *keyboardListTail = 0;
 
-void keyboardInit() {}
+void keyboardInit() { keyboardInsert(ps2Init()); }
 
 int keyboardInsert(struct keyboard *keyboard) {
   int res = 0;
