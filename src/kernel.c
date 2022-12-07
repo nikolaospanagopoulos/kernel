@@ -103,7 +103,7 @@ void kernel_main() {
 
   struct process *process = 0;
 
-  int res = processLoadSwitch("0:/blank.bin", &process);
+  int res = processLoadSwitch("0:/blank.elf", &process);
   if (res != ALL_OK) {
     panic("failed to load process");
   }

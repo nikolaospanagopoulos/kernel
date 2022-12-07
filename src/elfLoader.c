@@ -52,7 +52,7 @@ struct elf32Phdr *elfPheader(struct elfHeader *header) {
 }
 
 struct elf32Shdr *elfSection(struct elfHeader *header, int index) {
-  return &elfHeader(header)[index];
+  return &elfSheader(header)[index];
 }
 
 char *elfStrTable(struct elfHeader *header) {
@@ -67,7 +67,7 @@ int elfValidateLoaded(struct elfHeader *header) {
   return (elfValidSignature(header) && elfValidClass(header) &&
           elfValidEncoding(header) && elfHasProgramHeader(header))
              ? ALL_OK
-             : -EINVARG;
+             : -EINFORMAT;
 }
 
 int elfProcessPhdrPtLoad(struct elfFile *file, struct elf32Phdr *phdr) {
@@ -94,7 +94,7 @@ void elfClose(struct elfFile *file) {
   kfree(file);
 }
 
-int elfProgramHeader(struct elfFile *elfFile, struct elf32Phdr *phdr) {
+int elfProcessPheader(struct elfFile *elfFile, struct elf32Phdr *phdr) {
   int res = 0;
   switch (phdr->pType) {
   case PT_LOAD:
@@ -104,7 +104,9 @@ int elfProgramHeader(struct elfFile *elfFile, struct elf32Phdr *phdr) {
 
   return res;
 }
-
+struct elf32Phdr *elfProgramHeader(struct elfHeader *header, int index) {
+  return &elfPheader(header)[index];
+}
 int elfProcessHeaders(struct elfFile *elfFile) {
   int res = 0;
 
@@ -112,6 +114,8 @@ int elfProcessHeaders(struct elfFile *elfFile) {
 
   for (int i = 0; i < header->ePhnum; i++) {
     struct elf32Phdr *phdr = elfProgramHeader(header, i);
+    res = elfProcessPheader(elfFile, phdr);
+
     if (res < 0) {
       break;
     }
@@ -152,7 +156,7 @@ int elfLoad(const char *filename, struct elfFile **fileOut) {
   struct fileStat stat;
   res = fstat(fd, &stat);
 
-  if (res <= 0) {
+  if (res < 0) {
     goto out;
   }
 

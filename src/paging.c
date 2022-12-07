@@ -167,3 +167,8 @@ uint32_t pagingGet(uint32_t *directory, void *virt) {
   uint32_t *table = (uint32_t *)(entry & 0xfffff000);
   return table[tableIndex];
 }
+void *pagingAlignToLowerPage(void *addr) {
+  uint32_t _address = (uint32_t)addr;
+  _address -= (_address % PAGING_PAGE_SIZE);
+  return (void *)_address;
+}

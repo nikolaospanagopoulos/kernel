@@ -1,6 +1,12 @@
 #pragma once
 #include "config.h"
+#include "elfLoader.h"
 #include "stdint.h"
+
+#define PROCESS_TYPE_ELF 0
+#define PROCESS_TYPE_BINARY 1
+
+typedef unsigned char PROCESS_TYPE;
 
 struct process {
 
@@ -10,8 +16,12 @@ struct process {
   struct task *task;
   // the malloced memory of the process
   void *allocations[MAX_ALLOCATIONS];
-  // the physical memory of the process
-  void *ptr;
+  PROCESS_TYPE filetype;
+  union {
+    // the physical memory of the process
+    void *ptr;
+    struct elfFile *elfFile;
+  };
   // the pointer to the stack memory
   void *stack;
   // the size of the data pointed to by ptr

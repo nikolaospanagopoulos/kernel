@@ -3,6 +3,7 @@
 #include "kernelHeap.h"
 #include "memory.h"
 #include "paging.h"
+#include "process.h"
 #include "status.h"
 #include "string.h"
 // current task
@@ -82,6 +83,10 @@ int taskInit(struct task *task, struct process *process) {
 
   task->registers.ip =
       PROGRAM_VIRTUAL_ADDRESS; // place of execution before last interrupt
+
+  if (process->filetype == PROCESS_TYPE_ELF) {
+    task->registers.ip = elfHeader(process->elfFile)->eEntry;
+  }
 
   task->registers.ss = USER_DATA_SEGMENT;
   task->registers.esp = PROGRAM_VIRTUAL_STACK_ADDRESS_START;

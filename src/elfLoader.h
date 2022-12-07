@@ -22,3 +22,10 @@ struct elfFile {
 
 int elfLoad(const char *filename, struct elfFile **fileOut);
 void elfClose(struct elfFile *file);
+void *elfVirtualBase(struct elfFile *file);
+void *elfVirtualEnd(struct elfFile *file);
+void *elfPhysBase(struct elfFile *file);
+void *elfPhysEnd(struct elfFile *file);
+struct elfHeader *elfHeader(struct elfFile *file);
+struct elf32Phdr *elfPheader(struct elfHeader *header);
+void *elfMemory(struct elfFile *file);

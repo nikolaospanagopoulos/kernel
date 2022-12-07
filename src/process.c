@@ -1,5 +1,6 @@
 #include "process.h"
 #include "config.h"
+#include "elfLoader.h"
 #include "file.h"
 #include "kernel.h"
 #include "kernelHeap.h"
@@ -59,17 +60,34 @@ static int processLoadBinary(const char *filename, struct process *process) {
     res = -EIO;
     goto out;
   }
+  process->filetype = PROCESS_TYPE_BINARY;
   process->ptr = programDataPtr;
   process->size = stat.filesize;
 out:
   fclose(fd);
   return res;
 }
+static int processLoadElf(const char *filename, struct process *process) {
+  int res = 0;
+  struct elfFile *elfFile = 0;
+  res = elfLoad(filename, &elfFile);
+  if (res < 0) {
+    goto out;
+  }
+  process->filetype = PROCESS_TYPE_ELF;
+  process->elfFile = elfFile;
+out:
+  return res;
+}
+
 static int processLoadData(const char *filename, struct process *process) {
   int res = 0;
 
-  res = processLoadBinary(filename, process);
+  res = processLoadElf(filename, process);
 
+  if (res == -EINFORMAT) {
+    res = processLoadBinary(filename, process);
+  }
   return res;
 }
 int processMapBinary(struct process *process) {
@@ -81,9 +99,50 @@ int processMapBinary(struct process *process) {
 
   return res;
 }
+void *elfPhdrPhysAddress(struct elfFile *file, struct elf32Phdr *phdr) {
+  return elfMemory(file) + phdr->pOffset;
+}
+static int processMapElf(struct process *process) {
+  int res = 0;
+
+  struct elfFile *elfFile = process->elfFile;
+  struct elfHeader *header = elfHeader(elfFile);
+  struct elf32Phdr *pheaders = elfPheader(header);
+
+  for (int i = 0; i < header->ePhnum; i++) {
+    struct elf32Phdr *phdr = &pheaders[i];
+    void *phdrPhysAddress = elfPhdrPhysAddress(elfFile, phdr);
+    int flags = PAGING_IS_PRESENT | PAGING_ACCESS_FROM_ALL;
+    if (phdr->pFlags & PF_W) {
+      flags |= PAGING_IS_WRITABLE;
+    }
+    res =
+        pagingMapTo(process->task->pageDirectory,
+                    pagingAlignToLowerPage((void *)phdr->pVaddr),
+                    pagingAlignToLowerPage(phdrPhysAddress),
+                    pagingAlignAddress(phdrPhysAddress + phdr->pFilesz), flags);
+    if (ISERR(res)) {
+      break;
+    }
+  }
+
+  return res;
+}
+
 int processMapMemory(struct process *process) {
   int res = 0;
-  res = processMapBinary(process);
+
+  switch (process->filetype) {
+
+  case PROCESS_TYPE_ELF:
+    res = processMapElf(process);
+    break;
+  case PROCESS_TYPE_BINARY:
+    res = processMapBinary(process);
+    break;
+  default:
+    panic("processMapMemory: invalid file type\n");
+  }
   if (res < 0) {
     goto out;
   }

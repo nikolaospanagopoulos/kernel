@@ -8,7 +8,8 @@ _start:
 
 loop:
 	call getKey
-	push message
+	;push message
+	push eax
     mov eax, 3
 	int 0x80
 	add esp,4
