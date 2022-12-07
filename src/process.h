@@ -39,3 +39,4 @@ int processLoad(const char *filename, struct process **process);
 struct process *processCurrent();
 int processSwitch(struct process *process);
 int processLoadSwitch(const char *filename, struct process **process);
+void *processMalloc(struct process *process, size_t size);

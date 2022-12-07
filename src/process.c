@@ -27,6 +27,26 @@ int processSwitch(struct process *process) {
 
   return 0;
 }
+static int findFreeAllocationIndex(struct process *process) {
+  int res = -ENOMEM;
+
+  for (int i = 0; i < MAX_ALLOCATIONS; i++) {
+    if (process->allocations[i] == 0) {
+      res = i;
+      break;
+    }
+  }
+  return res;
+}
+void *processMalloc(struct process *process, size_t size) {
+  void *ptr = kzalloc(size);
+  if (!ptr) {
+    return 0;
+  }
+  int index = findFreeAllocationIndex(process);
+  process->allocations[index] = ptr;
+  return ptr;
+}
 
 struct process *processGet(int index) {
   if (index < 0 || index >= MAX_PROCESSES) {
