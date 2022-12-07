@@ -5,10 +5,11 @@ section .asm
 global _start
 
 _start:
+
 loop:
 	call getKey
-	push eax
-	mov eax ,3
+	push message
+    mov eax, 3
 	int 0x80
 	add esp,4
 	jmp loop
