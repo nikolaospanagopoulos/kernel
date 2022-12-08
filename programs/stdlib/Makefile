@@ -1,4 +1,4 @@
-FILES= ./build/start.o ./build/os.o ./build/stdlib.o
+FILES= ./build/start.o ./build/os.o ./build/stdlib.o ./build/stdio.o ./build/os.c.o ./build/string.o ./build/memory.o
 INCLUDES=
 all: ${FILES}
 	i686-elf-ld -m elf_i386 -relocatable ${FILES} -o ./stdlib.elf
@@ -8,6 +8,14 @@ all: ${FILES}
 	nasm -f elf ./src/os.asm -o ./build/os.o
 ./build/stdlib.o: ./src/stdlib.c
 	i686-elf-gcc ${INCLUDES} $(FLAGS) -std=gnu99 -c ./src/stdlib.c -o ./build/stdlib.o
+./build/string.o: ./src/string.c
+	i686-elf-gcc ${INCLUDES} $(FLAGS) -std=gnu99 -c ./src/string.c -o ./build/string.o
+./build/stdio.o: ./src/stdio.c
+	i686-elf-gcc ${INCLUDES} $(FLAGS) -std=gnu99 -c ./src/stdio.c -o ./build/stdio.o
+./build/memory.o: ./src/memory.c
+	i686-elf-gcc ${INCLUDES} $(FLAGS) -std=gnu99 -c ./src/memory.c -o ./build/memory.o
+./build/os.c.o: ./src/os.c
+	i686-elf-gcc ${INCLUDES} $(FLAGS) -std=gnu99 -c ./src/os.c -o ./build/os.c.o
 clean:
 	rm -rf ${FILES}
 	rm ./blank.elf

@@ -8,6 +8,7 @@
 #include "status.h"
 #include "string.h"
 #include "task.h"
+#include <stdbool.h>
 
 // the current process
 struct process *currentProcess = 0;
@@ -27,11 +28,37 @@ int processSwitch(struct process *process) {
 
   return 0;
 }
+
+static bool processIsProcessPtr(struct process *process, void *ptr) {
+  for (int i = 0; i < MAX_ALLOCATIONS; i++) {
+    if (process->allocations[i].ptr == ptr) {
+      return true;
+    }
+  }
+  return false;
+}
+
+static void processAllocationsUnjoin(struct process *process, void *ptr) {
+  for (int i = 0; i < MAX_ALLOCATIONS; i++) {
+    if (process->allocations[i].ptr == ptr) {
+      process->allocations[i].ptr = 0x00;
+    }
+  }
+}
+
+void processFree(struct process *process, void *ptr) {
+  if (!processIsProcessPtr(process, ptr)) {
+    return;
+  }
+  processAllocationsUnjoin(process, ptr);
+  kfree(ptr);
+}
+
 static int findFreeAllocationIndex(struct process *process) {
   int res = -ENOMEM;
 
   for (int i = 0; i < MAX_ALLOCATIONS; i++) {
-    if (process->allocations[i] == 0) {
+    if (process->allocations[i].ptr == 0) {
       res = i;
       break;
     }
@@ -39,13 +66,30 @@ static int findFreeAllocationIndex(struct process *process) {
   return res;
 }
 void *processMalloc(struct process *process, size_t size) {
+
   void *ptr = kzalloc(size);
   if (!ptr) {
     return 0;
   }
   int index = findFreeAllocationIndex(process);
-  process->allocations[index] = ptr;
+
+  if (index < 0) {
+    goto out_err;
+  }
+  int res = pagingMapTo(
+      process->task->pageDirectory, ptr, ptr, pagingAlignAddress(ptr + size),
+      PAGING_IS_WRITABLE | PAGING_IS_PRESENT | PAGING_ACCESS_FROM_ALL);
+  if (res < 0) {
+    goto out_err;
+  }
+  process->allocations[index].ptr = ptr;
+  process->allocations[index].size = size;
   return ptr;
+out_err:
+  if (ptr) {
+    kfree(ptr);
+  }
+  return 0;
 }
 
 struct process *processGet(int index) {
@@ -140,7 +184,7 @@ static int processMapElf(struct process *process) {
         pagingMapTo(process->task->pageDirectory,
                     pagingAlignToLowerPage((void *)phdr->pVaddr),
                     pagingAlignToLowerPage(phdrPhysAddress),
-                    pagingAlignAddress(phdrPhysAddress + phdr->pFilesz), flags);
+                    pagingAlignAddress(phdrPhysAddress + phdr->pMemsz), flags);
     if (ISERR(res)) {
       break;
     }

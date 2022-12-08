@@ -1,16 +1,27 @@
-#include "../stdlib/src/os.h"
-#include "../stdlib/src/stdlib.h"
+#include "os.h"
+#include "stdio.h"
+#include "stdlib.h"
+#include "string.h"
 int main(int argc, char **argv) {
 
-  print("nikos");
+  printf("blank");
 
-  void *ptr = malloc(512);
+  char str[80] = "This is - www.tutorialspoint.com - website";
+  char *s = "-";
+  char *token;
 
-  while (1) {
-    if (getKey() != 0) {
-      print("key was pressed");
-    }
+  /* get the first token */
+  token = strtok(str, s);
+
+  /* walk through other tokens */
+  while (token != NULL) {
+    printf(" %s\n", token);
+
+    token = strtok(NULL, s);
   }
 
+  free(token);
+  while (1) {
+  }
   return 0;
 }

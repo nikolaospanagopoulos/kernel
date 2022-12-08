@@ -1,8 +1,11 @@
 [BITS 32]
-
+section .asm
 global print:function
-global getKey:function
+global osGetKey:function
 global osMalloc:function
+global osFree:function
+global osPutchar:function
+global osProcessLoadStart:function
 
 print:
    push ebp
@@ -14,7 +17,7 @@ print:
    pop ebp
    ret
 
-getKey:
+osGetKey:
    push ebp
    mov ebp, esp
    mov eax, 2
@@ -27,6 +30,33 @@ osMalloc:
    mov ebp, esp
    mov eax, 4
    push dword[ebp + 8]
+   int 0x80
+   add esp, 4
+   pop ebp
+   ret
+osFree:
+   push ebp,
+   mov ebp, esp
+   mov eax, 5
+   push dword[ebp + 8]
+   int 0x80
+   add esp, 4
+   pop ebp
+   ret
+osPutchar:
+   push ebp
+   mov ebp, esp
+   mov eax, 3
+   push dword[ebp + 8]
+   int 0x80
+   add esp, 4
+   pop ebp
+   ret
+osProcessLoadStart:
+   push ebp
+   mov ebp, esp
+   mov eax, 6
+   push dword[ebp +8]
    int 0x80
    add esp, 4
    pop ebp

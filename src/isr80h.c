@@ -2,6 +2,7 @@
 #include "idt.h"
 #include "isr80hIo.h"
 #include "isr80heap.h"
+#include "isr80process.h"
 #include "misc.h"
 
 void isr80hRegisterCommands() {
@@ -11,4 +12,7 @@ void isr80hRegisterCommands() {
   isr80RegisterCommand(SYSTEM_COMMAND_2_GETKEY, isr80hCommand2GetKey);
   isr80RegisterCommand(SYSTEM_COMMAND_3_PUTCHAR, isr80hCommand3PutChar);
   isr80RegisterCommand(SYSTEM_COMMAND_4_MALLOC, isr80hCommand4Malloc);
+  isr80RegisterCommand(SYSTEM_COMMAND_5_FREE, isr80hCommand5Free);
+  isr80RegisterCommand(SYSTEM_COMMAND_6_PROCESS_LOAD_START,
+                       isr80hCommand6ProcessLoadStart);
 }
