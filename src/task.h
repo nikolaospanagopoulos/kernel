@@ -1,5 +1,4 @@
 #pragma once
-
 #include "config.h"
 #include "idt.h"
 #include "paging.h"
@@ -50,3 +49,4 @@ int copyStringFromTask(struct task *task, void *virtualP, void *phys, int max);
 void *taskGetTaskItem(struct task *task, int index);
 struct task *taskCurrent();
 int taskPageTask(struct task *task);
+void *taskVirtualAddressToPhys(struct task *task, void *virtalAddress);

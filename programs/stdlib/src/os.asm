@@ -6,7 +6,7 @@ global osMalloc:function
 global osFree:function
 global osPutchar:function
 global osProcessLoadStart:function
-
+global osProcessGetArguments:function
 print:
    push ebp
    mov ebp, esp
@@ -56,6 +56,15 @@ osProcessLoadStart:
    push ebp
    mov ebp, esp
    mov eax, 6
+   push dword[ebp +8]
+   int 0x80
+   add esp, 4
+   pop ebp
+   ret
+osProcessGetArguments:
+   push ebp
+   mov ebp, esp
+   mov eax, 8
    push dword[ebp +8]
    int 0x80
    add esp, 4

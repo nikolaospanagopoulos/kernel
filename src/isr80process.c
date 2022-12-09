@@ -29,3 +29,14 @@ void *isr80hCommand6ProcessLoadStart(struct interruptFrame *frame) {
 out:
   return 0;
 }
+void *isr80hCommand7InvokeSystemCommand(struct interruptFrame *frame) {
+  return 0;
+}
+void *isr80hCommand8GetProgramArguments(struct interruptFrame *frame) {
+  struct process *process = taskCurrent()->process;
+  struct processArguments *arguments = taskVirtualAddressToPhys(
+      taskCurrent(), taskGetTaskItem(taskCurrent(), 0));
+
+  processGetArguments(process, &arguments->argc, &arguments->argv);
+  return 0;
+};

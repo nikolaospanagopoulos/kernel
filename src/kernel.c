@@ -14,6 +14,7 @@
 #include "process.h"
 #include "status.h"
 #include "streamer.h"
+#include "string.h"
 #include "task.h"
 #include "tss.h"
 

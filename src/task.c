@@ -194,3 +194,15 @@ void *taskGetTaskItem(struct task *task, int index) {
   kernelPage();
   return result;
 }
+void *pagingGetPhysicalAddress(uint32_t *directory, void *virt) {
+  void *virtualAddrNew = (void *)pagingAlignToLowerPage(virt);
+  void *difference = (void *)((uint32_t)virt - (uint32_t)virtualAddrNew);
+  return (void *)((pagingGet(directory, virtualAddrNew) & 0xfffff000) +
+                  difference);
+}
+void *taskVirtualAddressToPhys(struct task *task, void *virtalAddress) {
+  void *physAddress = 0;
+  physAddress = pagingGetPhysicalAddress(task->pageDirectory->directoryEntry,
+                                         virtalAddress);
+  return physAddress;
+}

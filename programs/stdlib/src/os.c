@@ -1,6 +1,48 @@
 #include "os.h"
 #include "stdio.h"
+#include "stdlib.h"
+#include "string.h"
 
+struct commandArgument *osParseCommand(const char *command, int max) {
+
+  struct commandArgument *rootCommand = 0;
+  char scommand[1024];
+  if (max >= (int)sizeof(scommand)) {
+    return 0;
+  }
+  strncpy(scommand, command, sizeof(scommand));
+  char *token = strtok(scommand, " ");
+
+  if (!token) {
+    goto out;
+  }
+  rootCommand = osMalloc(sizeof(struct commandArgument));
+  if (!rootCommand) {
+    goto out;
+  }
+  strncpy(rootCommand->argument, token, sizeof(rootCommand->argument));
+  rootCommand->next = 0;
+
+  struct commandArgument *current = rootCommand;
+  token = strtok(NULL, " ");
+
+  while (token != 0) {
+    struct commandArgument *newCommand =
+        osMalloc(sizeof(struct commandArgument));
+    if (!newCommand) {
+      break;
+    }
+    strncpy(newCommand->argument, token, sizeof(newCommand->argument));
+    newCommand->next = 0x00;
+    current->next = newCommand;
+    current = newCommand;
+    token = strtok(NULL, " ");
+  }
+
+out:
+  osFree(token);
+  return rootCommand;
+}
 int osGetKeyBlock() {
   int val = 0;
 

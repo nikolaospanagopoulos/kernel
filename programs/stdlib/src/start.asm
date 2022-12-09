@@ -3,8 +3,8 @@
 section .asm
 
 global _start
-extern main
+extern cStart
 
 _start:
-   call main
+   call cStart
    ret

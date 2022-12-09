@@ -11,6 +11,17 @@ struct process_allocation {
   void *ptr;
   size_t size;
 };
+
+struct commandArgument {
+  char argument[512];
+  struct commandArgument *next;
+};
+
+struct processArguments {
+  int argc;
+  char **argv;
+};
+
 struct process {
 
   uint16_t id; // process id
@@ -35,7 +46,11 @@ struct process {
     int tail;
     int head;
   } keyboard;
+  struct processArguments arguments;
 };
+int processInjectArguments(struct process *process,
+                           struct commandArgument *rootArgument);
+void processGetArguments(struct process *process, int *argc, char ***argv);
 int processLoadForSlot(const char *filename, struct process **process,
                        int processSlot);
 int processLoad(const char *filename, struct process **process);

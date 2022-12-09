@@ -164,8 +164,8 @@ int elfLoad(const char *filename, struct elfFile **fileOut) {
   elfFile->elfMemory = kzalloc(stat.filesize);
   res = fread(elfFile->elfMemory, stat.filesize, 1, fd);
   if (res < 0) {
+    kfree(elfFile->elfMemory);
     goto out;
-    // kfree(elfFile->elfMemory);
   }
   res = elfProcessLoaded(elfFile);
 

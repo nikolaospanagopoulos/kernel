@@ -26,7 +26,6 @@ int printf(const char *fmt, ...) {
       ival = va_arg(ap, int);
       char buff[20];
       print(itoa(ival, buff, 10));
-      memset(buff, '\0', sizeof(buff));
       break;
     case 's':
       sval = va_arg(ap, char *);

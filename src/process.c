@@ -42,12 +42,31 @@ static void processAllocationsUnjoin(struct process *process, void *ptr) {
   for (int i = 0; i < MAX_ALLOCATIONS; i++) {
     if (process->allocations[i].ptr == ptr) {
       process->allocations[i].ptr = 0x00;
+      process->allocations[i].size = 0;
     }
   }
 }
 
+static struct process_allocation *processGetAllocation(struct process *process,
+                                                       void *addr) {
+
+  for (int i = 0; i < MAX_ALLOCATIONS; i++) {
+    if (process->allocations[i].ptr == addr) {
+      return &process->allocations[i];
+    }
+  }
+  return 0;
+}
 void processFree(struct process *process, void *ptr) {
-  if (!processIsProcessPtr(process, ptr)) {
+  struct process_allocation *allocation = processGetAllocation(process, ptr);
+  if (!allocation) {
+    return;
+  }
+  int res = pagingMapTo(process->task->pageDirectory, allocation->ptr,
+                        allocation->ptr,
+                        pagingAlignAddress(allocation->ptr + allocation->size),
+                        PAGING_IS_PRESENT);
+  if (res < 0) {
     return;
   }
   processAllocationsUnjoin(process, ptr);
@@ -297,5 +316,57 @@ out:
     }
     // free process
   }
+  return res;
+}
+void processGetArguments(struct process *process, int *argc, char ***argv) {
+  *argc = process->arguments.argc;
+  *argv = process->arguments.argv;
+}
+
+int processCountCommandArguments(struct commandArgument *rootArgument) {
+  struct commandArgument *current = rootArgument;
+  int i = 0;
+  while (current) {
+    current = current->next;
+    i++;
+  }
+  return i;
+}
+
+int processInjectArguments(struct process *process,
+                           struct commandArgument *rootArgument) {
+
+  int res = 0;
+
+  struct commandArgument *current = rootArgument;
+
+  int i = 0;
+
+  int argc = processCountCommandArguments(rootArgument);
+
+  if (argc == 0) {
+    res = -EIO;
+    goto out;
+  }
+
+  char **argv = processMalloc(process, sizeof(const char *) * argc);
+  if (!argv) {
+    res = -ENOMEM;
+    goto out;
+  }
+  while (current) {
+    char *argumentString = processMalloc(process, sizeof(current->argument));
+    if (!argumentString) {
+      res = -EIO;
+      goto out;
+    }
+    strncpy(argumentString, current->argument, sizeof(current->argument));
+    argv[i] = argumentString;
+    current = current->next;
+    i++;
+  }
+  process->arguments.argc = argc;
+  process->arguments.argv = argv;
+out:
   return res;
 }

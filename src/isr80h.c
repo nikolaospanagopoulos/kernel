@@ -15,4 +15,8 @@ void isr80hRegisterCommands() {
   isr80RegisterCommand(SYSTEM_COMMAND_5_FREE, isr80hCommand5Free);
   isr80RegisterCommand(SYSTEM_COMMAND_6_PROCESS_LOAD_START,
                        isr80hCommand6ProcessLoadStart);
+  isr80RegisterCommand(SYSTEM_COMMAND_7_INVOKE_SYSTEM_COMMAND,
+                       isr80hCommand7InvokeSystemCommand);
+  isr80RegisterCommand(SYSTEM_COMMAND_8_GET_PROGRAM_ARGUMENTS,
+                       isr80hCommand8GetProgramArguments);
 }
