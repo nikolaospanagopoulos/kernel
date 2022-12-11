@@ -6,7 +6,7 @@
 struct commandArgument *osParseCommand(const char *command, int max) {
 
   struct commandArgument *rootCommand = 0;
-  char scommand[1024];
+  char scommand[1025];
   if (max >= (int)sizeof(scommand)) {
     return 0;
   }
@@ -72,4 +72,13 @@ void osTerminalReadLine(char *out, int max, bool outputWhileTyping) {
     out[i] = key;
   }
   out[i] = 0x00;
+}
+int osSystemRun(const char *command) {
+  char buff[1024];
+  strncpy(buff, command, sizeof(buff));
+  struct commandArgument *rootCommand = osParseCommand(buff, sizeof(buff));
+  if (!rootCommand) {
+    return -1;
+  }
+  return osSystem(rootCommand);
 }

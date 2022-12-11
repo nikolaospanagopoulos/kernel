@@ -50,3 +50,4 @@ void *taskGetTaskItem(struct task *task, int index);
 struct task *taskCurrent();
 int taskPageTask(struct task *task);
 void *taskVirtualAddressToPhys(struct task *task, void *virtalAddress);
+void taskNext();

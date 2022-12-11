@@ -29,6 +29,76 @@ int processSwitch(struct process *process) {
   return 0;
 }
 
+int processTerminateAllocations(struct process *process) {
+  for (int i = 0; i < MAX_ALLOCATIONS; i++) {
+    processFree(process, process->allocations[i].ptr);
+
+    // maybe use Kfree() for speed???????
+  }
+  return 0;
+}
+
+int processFreeBinaryData(struct process *process) {
+  kfree(process->ptr);
+  return 0;
+}
+
+int processFreeElfData(struct process *process) {
+  elfClose(process->elfFile);
+  return 0;
+}
+
+int processFreeProgramData(struct process *process) {
+  int res = 0;
+  switch (process->filetype) {
+  case PROCESS_TYPE_BINARY:
+    res = processFreeBinaryData(process);
+    break;
+  case PROCESS_TYPE_ELF:
+    res = processFreeElfData(process);
+    break;
+  default:
+    res = -EINVARG;
+  }
+
+  return res;
+}
+static void processSwitchToAny() {
+  for (int i = 0; i < MAX_PROCESSES; i++) {
+    if (processes[i]) {
+      processSwitch(processes[i]);
+      return;
+    }
+  }
+  panic("no process to switch to!!");
+}
+
+static void processUnlink(struct process *process) {
+  processes[process->id] = 0x00;
+  if (currentProcess == process) {
+    processSwitchToAny();
+  }
+}
+int processTerminate(struct process *process) {
+  int res = 0;
+  res = processTerminateAllocations(process);
+  if (res < 0) {
+    goto out;
+  }
+  res = processFreeProgramData(process);
+  if (res < 0) {
+    goto out;
+  }
+  // free stack memory
+  kfree(process->stack);
+  taskFree(process->task);
+  processUnlink(process);
+
+  print("process was teminated");
+out:
+  return res;
+}
+
 static bool processIsProcessPtr(struct process *process, void *ptr) {
   for (int i = 0; i < MAX_ALLOCATIONS; i++) {
     if (process->allocations[i].ptr == ptr) {
@@ -369,4 +439,10 @@ int processInjectArguments(struct process *process,
   process->arguments.argv = argv;
 out:
   return res;
+}
+void *isr80hCommand9Exit(struct interruptFrame *frame) {
+  struct process *process = taskCurrent()->process;
+  processTerminate(process);
+  taskNext();
+  return 0;
 }

@@ -3,3 +3,4 @@
 void *isr80hCommand6ProcessLoadStart(struct interruptFrame *frame);
 void *isr80hCommand7InvokeSystemCommand(struct interruptFrame *frame);
 void *isr80hCommand8GetProgramArguments(struct interruptFrame *frame);
+void *isr80hCommand9Exit(struct interruptFrame *frame);

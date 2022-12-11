@@ -20,3 +20,6 @@ void osTerminalReadLine(char *out, int max, bool outputWhileTyping);
 void osProcessLoadStart(const char *filename);
 struct commandArgument *osParseCommand(const char *command, int max);
 void osProcessGetArguments(struct processArguments *arguments);
+int osSystem(struct commandArgument *arguments);
+int osSystemRun(const char *command);
+void osExit();

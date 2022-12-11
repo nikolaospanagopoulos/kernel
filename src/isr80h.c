@@ -19,4 +19,5 @@ void isr80hRegisterCommands() {
                        isr80hCommand7InvokeSystemCommand);
   isr80RegisterCommand(SYSTEM_COMMAND_8_GET_PROGRAM_ARGUMENTS,
                        isr80hCommand8GetProgramArguments);
+  isr80RegisterCommand(SYSTEM_COMMAND_9_EXIT, isr80hCommand9Exit);
 }

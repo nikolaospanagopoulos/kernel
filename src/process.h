@@ -59,3 +59,4 @@ int processSwitch(struct process *process);
 int processLoadSwitch(const char *filename, struct process **process);
 void *processMalloc(struct process *process, size_t size);
 void processFree(struct process *process, void *ptr);
+int processTerminate(struct process *process);

@@ -1,6 +1,6 @@
 #pragma once
 #include "keyboard.h"
-
+#define PS2_CAPSLOCK 0x3A
 #define PS2_PORT 0x64
 #define PS2_COMMAND_ENABLE 0xAE
 #define PS2_KEYBOARD_KEY_RELEASED 0b10000000

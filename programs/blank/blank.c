@@ -4,9 +4,7 @@
 #include "string.h"
 int main(int argc, char **argv) {
 
-  print(argv[0]);
+  printf("%s", argv[0]);
 
-  while (1) {
-  }
   return 0;
 }

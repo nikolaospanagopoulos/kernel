@@ -1,4 +1,5 @@
 #include "keyboard.h"
+#include "kernel.h"
 #include "process.h"
 #include "ps2Keyboard.h"
 #include "status.h"
@@ -8,6 +9,13 @@ static struct keyboard *keyboardListHead = 0;
 static struct keyboard *keyboardListTail = 0;
 
 void keyboardInit() { keyboardInsert(ps2Init()); }
+void keyboardSetCapsLock(struct keyboard *keyboard, int state) {
+  keyboard->capsLockState = state;
+}
+
+int keyboardGetCapsLockState(struct keyboard *keyboard) {
+  return keyboard->capsLockState;
+}
 
 int keyboardInsert(struct keyboard *keyboard) {
   int res = 0;

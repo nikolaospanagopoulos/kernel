@@ -10,9 +10,8 @@ int main(int argc, char **argv) {
     print("> ");
     char buff[1024];
     osTerminalReadLine(buff, sizeof(buff), true);
-
-    osProcessLoadStart(buff);
-
+    print("\n");
+    osSystemRun(buff);
     print("\n");
   }
 

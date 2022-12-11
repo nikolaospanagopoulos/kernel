@@ -3,6 +3,7 @@
 #include "io.h"
 #include "kernel.h"
 #include "memory.h"
+#include "process.h"
 #include "status.h"
 #include "task.h"
 idtDesc intDescriptors[osTotalInterupts];
@@ -21,6 +22,15 @@ struct idtrDesc idtrDescriptor;
 
 void no_interrupt_handler() { outb(0x20, 0x20); }
 
+void idtHandleException() {
+  processTerminate(taskCurrent()->process);
+  taskNext();
+}
+void idtClock() {
+
+  outb(0x20, 0x20);
+  taskNext();
+}
 void interruptHandler(int interrupt, struct interruptFrame *frame) {
 
   kernelPage();
@@ -64,6 +74,12 @@ void initializeIdt() {
 
   idtSet(0, int0h);
   idtSet(0x80, isr80hWrapper);
+
+  for (int i = 0; i < 0x20; i++) {
+    idtRegisterInterruptCallback(i, idtHandleException);
+  }
+
+  idtRegisterInterruptCallback(0x20, idtClock);
   idt_load(&idtrDescriptor);
 }
 

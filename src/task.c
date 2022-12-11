@@ -206,3 +206,11 @@ void *taskVirtualAddressToPhys(struct task *task, void *virtalAddress) {
                                          virtalAddress);
   return physAddress;
 }
+void taskNext() {
+  struct task *nextTask = taskGetNext();
+  if (!nextTask) {
+    panic("no more tasks");
+  }
+  taskSwitch(nextTask);
+  taskReturn(&nextTask->registers);
+}

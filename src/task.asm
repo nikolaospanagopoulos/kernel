@@ -57,5 +57,5 @@ restoreGeneralPurposeRegisters:
    mov ecx, [ebx + 20]
    mov eax, [ebx + 24]
    mov ebx, [ebx + 12]
-   pop ebp
+   add esp, 4
    ret
