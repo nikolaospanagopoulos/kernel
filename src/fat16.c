@@ -189,6 +189,7 @@ int fat16GetRootDirectory(struct disk *disk, struct fatPrivateInfo *fatPrivate,
                           struct fatDirectory *directory) {
   int res = 0;
 
+  struct fatDirectoryItem *dir = 0;
   struct fat_header_bios_parameter_block *primaryHeader =
       &fatPrivate->header.primaryHeader;
   // root directory position
@@ -204,7 +205,7 @@ int fat16GetRootDirectory(struct disk *disk, struct fatPrivateInfo *fatPrivate,
   }
 
   int totalItems = fat16GetTotalItemsForDirectory(disk, rootDirectoryPosition);
-  struct fatDirectoryItem *dir = kzalloc(rootDirSize);
+  dir = kzalloc(rootDirSize);
   if (!dir) {
     res = -ENOMEM;
     goto out;
@@ -229,6 +230,11 @@ int fat16GetRootDirectory(struct disk *disk, struct fatPrivateInfo *fatPrivate,
       rootDirectoryPosition + (rootDirSize / disk->sectorSize);
 
 out:
+  return res;
+errOut:
+  if (dir) {
+    kfree(dir);
+  }
   return res;
 }
 int fat16Resolve(struct disk *disk) {
@@ -274,11 +280,17 @@ out:
   return res;
 }
 // null terminated instead of space
-void fat16ToProper(char **out, const char *in) {
+void fat16ToProper(char **out, const char *in, size_t size) {
+  int i = 0;
   while (*in != 0x00 && *in != 0x20) {
     **out = *in;
     *out += 1;
     in += 1;
+    if (i >= size - 1) {
+      **out = 0x00;
+      return;
+    }
+    i++;
   }
   if (*in == 0x20) {
     **out = 0x00;
@@ -289,10 +301,10 @@ void fat16GetFullRelativeFilename(struct fatDirectoryItem *item, char *out,
                                   int maxLen) {
   memset(out, 0x00, maxLen);
   char *outTmp = out;
-  fat16ToProper(&outTmp, (const char *)item->filename);
+  fat16ToProper(&outTmp, (const char *)item->filename, sizeof(item->filename));
   if (item->ext[0] != 0x00 && item->ext[0] != 0x20) {
     *outTmp++ = '.';
-    fat16ToProper(&outTmp, (const char *)item->ext);
+    fat16ToProper(&outTmp, (const char *)item->ext, sizeof(item->ext));
   }
 }
 
@@ -500,6 +512,7 @@ struct fatItem *fat16NewFatItemForDirectoryItem(struct disk *disk,
     // check if it is subdirectory and not file
     fatItem->directory = fat16LoadFatDirectory(disk, item);
     fatItem->type = FAT_ITEM_TYPE_DIRECTORY;
+    return fatItem;
   }
   fatItem->type = FAT_ITEM_TYPE_FILE;
   fatItem->item =
@@ -549,22 +562,31 @@ out:
   return currentItem;
 }
 void *fat16open(struct disk *disk, struct pathPart *path, FILE_MODE mode) {
-  if (mode != FILE_MODE_READ) {
-    return ERROR(-ERDONLY);
-  }
   struct fatFileDescriptor *descriptor = 0;
+  int errCode = 0;
+  if (mode != FILE_MODE_READ) {
+    errCode = -ERDONLY;
+    goto errOut;
+  }
   descriptor = kzalloc(sizeof(struct fatFileDescriptor));
   if (!descriptor) {
-    return ERROR(-ENOMEM);
+    errCode = -ENOMEM;
+    goto errOut;
   }
   descriptor->item = fat16GetDirectoryEntry(disk, path);
 
   if (!descriptor->item) {
-    return ERROR(-EIO);
+    errCode = -EIO;
+    goto errOut;
   }
 
   descriptor->position = 0;
   return descriptor;
+errOut:
+  if (descriptor) {
+    kfree(descriptor);
+  }
+  return ERROR(errCode);
 }
 int fat16Read(struct disk *disk, void *descriptor, uint32_t size,
               uint32_t numMemBlocks, char *outPtr) {

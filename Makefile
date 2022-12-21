@@ -27,7 +27,7 @@ all: ./bin/boot.bin ./bin/kernel.bin userprograms
 ./build/kernel.o: ./src/kernel.c
 	i686-elf-gcc $(INCLUDES) $(FLAGS) -std=gnu99 -c ./src/kernel.c -o ./build/kernel.o
 
-./build/idt/idt.o: ./src/kernel.c
+./build/idt/idt.o: ./src/idt.c
 	i686-elf-gcc $(INCLUDES) $(FLAGS) -std=gnu99 -c ./src/idt.c -o ./build/idt/idt.o
 
 ./build/memory/memory.o: ./src/memory.c

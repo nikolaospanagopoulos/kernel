@@ -4,7 +4,13 @@
 #include "string.h"
 int main(int argc, char **argv) {
 
-  printf("%s", argv[0]);
+  char *myStr = (char *)malloc(sizeof("Vue is terrible"));
+
+  strncpy(myStr, "Vue is terrible", sizeof("Vue is terrible"));
+
+  printf("%s", myStr);
+
+  free(myStr);
 
   return 0;
 }

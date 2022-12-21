@@ -94,7 +94,6 @@ int processTerminate(struct process *process) {
   taskFree(process->task);
   processUnlink(process);
 
-  print("process was teminated");
 out:
   return res;
 }
@@ -191,6 +190,7 @@ static int processLoadBinary(const char *filename, struct process *process) {
   int res = 0;
 
   int fd = fopen(filename, "r");
+  void *programDataPtr = 0x00;
 
   if (!fd) {
     res = -EIO;
@@ -202,7 +202,7 @@ static int processLoadBinary(const char *filename, struct process *process) {
     goto out;
   }
 
-  void *programDataPtr = kzalloc(stat.filesize);
+  programDataPtr = kzalloc(stat.filesize);
   if (!programDataPtr) {
     res = -ENOMEM;
     goto out;
@@ -217,6 +217,11 @@ static int processLoadBinary(const char *filename, struct process *process) {
   process->ptr = programDataPtr;
   process->size = stat.filesize;
 out:
+  if (res < 0) {
+    if (programDataPtr) {
+      kfree(programDataPtr);
+    }
+  }
   fclose(fd);
   return res;
 }
