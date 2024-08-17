@@ -28,7 +28,17 @@ Follow these steps to set up and run the kernel on your system:
 
    ```bash
    git clone <repository_url>
+   ```
+
+2. **create mount point:**
+   ```bash
    sudo mkdir -p /mnt/d
+   ```
+3. **make:**
+   ```
    make
+   ```
+4. **emulate:**
+   ```
    qemu-system-x86_64 -hda ./bin/os.bin
    ```
